@@ -10,9 +10,16 @@ import (
 	"time"
 )
 
+// Build-time variables injected via -ldflags
+var (
+	Version   = "1.0.0"
+	BuildTime = "unknown"
+	Commit    = "unknown"
+	SourceDir = "unknown"
+)
+
 const (
-	version = "1.0.0"
-	banner  = `
+	banner = `
 ╔═══════════════════════════════════════════════════════════╗
 ║       API Latency Optimizer - Benchmark Tool             ║
 ║       Version: %-10s                                 ║
@@ -49,13 +56,16 @@ func main() {
 
 	// Show version
 	if *showVersion {
-		fmt.Printf("API Latency Optimizer v%s\n", version)
+		fmt.Printf("API Latency Optimizer v%s\n", Version)
+		fmt.Printf("Build Time: %s\n", BuildTime)
+		fmt.Printf("Commit: %s\n", Commit)
+		fmt.Printf("Source Dir: %s\n", SourceDir)
 		os.Exit(0)
 	}
 
 	// Print banner
 	if !*quiet {
-		fmt.Printf(banner, version)
+		fmt.Printf(banner, Version)
 		fmt.Println()
 	}
 
