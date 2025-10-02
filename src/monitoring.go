@@ -10,59 +10,59 @@ import (
 // MonitoringConfig defines monitoring system configuration
 type MonitoringConfig struct {
 	// General settings
-	Enabled            bool          // Master enable/disable switch
+	Enabled bool // Master enable/disable switch
 
 	// Collection settings
-	MetricsInterval    time.Duration
-	SnapshotInterval   time.Duration
-	CleanupInterval    time.Duration
+	MetricsInterval  time.Duration
+	SnapshotInterval time.Duration
+	CleanupInterval  time.Duration
 
 	// Dashboard settings
-	DashboardEnabled   bool
-	DashboardPort      int
-	DashboardRefresh   time.Duration
+	DashboardEnabled bool
+	DashboardPort    int
+	DashboardRefresh time.Duration
 
 	// Alerting settings
 	AlertingEnabled    bool
-	AlertsEnabled      bool          // Alias for compatibility
+	AlertsEnabled      bool // Alias for compatibility
 	AlertCheckInterval time.Duration
 	AlertRules         []AlertRule
 
 	// Prometheus settings
-	PrometheusEnabled  bool
-	PrometheusPort     int
-	PrometheusPath     string
+	PrometheusEnabled bool
+	PrometheusPort    int
+	PrometheusPath    string
 
 	// Storage settings
-	RetentionPeriod    time.Duration
-	MaxSnapshots       int
-	OutputPath         string
+	RetentionPeriod time.Duration
+	MaxSnapshots    int
+	OutputPath      string
 }
 
 // MonitoringSystem orchestrates all monitoring components
 type MonitoringSystem struct {
-	config          MonitoringConfig
-	collector       *MetricsCollector
-	dashboard       *Dashboard
-	alertManager    *AlertManager
-	promExporter    *PrometheusExporter
+	config       MonitoringConfig
+	collector    *MetricsCollector
+	dashboard    *Dashboard
+	alertManager *AlertManager
+	promExporter *PrometheusExporter
 
 	// Component references for monitoring
-	benchmarker     *Benchmarker
-	cache           *LRUCache
+	benchmarker *Benchmarker
+	cache       *LRUCache
 
 	// Lifecycle management
-	ctx             context.Context
-	cancel          context.CancelFunc
-	wg              sync.WaitGroup
-	mu              sync.RWMutex
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
+	mu     sync.RWMutex
 
 	// State tracking
-	startTime       time.Time
-	running         bool
+	startTime time.Time
+	running   bool
 
 	// Background tasks
-	stopChannels    []chan struct{}
+	stopChannels []chan struct{}
 }
 
 // NewMonitoringSystem creates a new monitoring system

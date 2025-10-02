@@ -10,74 +10,74 @@ import (
 
 // MonitoringSnapshot represents a complete point-in-time capture of all metrics
 type MonitoringSnapshot struct {
-	Timestamp           time.Time          `json:"timestamp"`
+	Timestamp time.Time `json:"timestamp"`
 
 	// Cache metrics
-	CacheHitRatio       float64            `json:"cache_hit_ratio"`
-	CacheMissRatio      float64            `json:"cache_miss_ratio"`
-	CacheSize           int                `json:"cache_size"`
-	CacheCapacity       int                `json:"cache_capacity"`
-	CacheMemoryUsageMB  float64            `json:"cache_memory_usage_mb"`
-	CachePeakMemoryMB   float64            `json:"cache_peak_memory_mb"`
-	CacheTotalGets      int64              `json:"cache_total_gets"`
-	CacheTotalHits      int64              `json:"cache_total_hits"`
-	CacheTotalMisses    int64              `json:"cache_total_misses"`
-	CacheEvictions      int64              `json:"cache_evictions"`
-	CacheExpirations    int64              `json:"cache_expirations"`
+	CacheHitRatio      float64 `json:"cache_hit_ratio"`
+	CacheMissRatio     float64 `json:"cache_miss_ratio"`
+	CacheSize          int     `json:"cache_size"`
+	CacheCapacity      int     `json:"cache_capacity"`
+	CacheMemoryUsageMB float64 `json:"cache_memory_usage_mb"`
+	CachePeakMemoryMB  float64 `json:"cache_peak_memory_mb"`
+	CacheTotalGets     int64   `json:"cache_total_gets"`
+	CacheTotalHits     int64   `json:"cache_total_hits"`
+	CacheTotalMisses   int64   `json:"cache_total_misses"`
+	CacheEvictions     int64   `json:"cache_evictions"`
+	CacheExpirations   int64   `json:"cache_expirations"`
 
 	// Benchmark metrics (from last run)
-	LatencyP50          float64            `json:"latency_p50_ms"`
-	LatencyP95          float64            `json:"latency_p95_ms"`
-	LatencyP99          float64            `json:"latency_p99_ms"`
-	LatencyMean         float64            `json:"latency_mean_ms"`
-	LatencyMin          float64            `json:"latency_min_ms"`
-	LatencyMax          float64            `json:"latency_max_ms"`
+	LatencyP50  float64 `json:"latency_p50_ms"`
+	LatencyP95  float64 `json:"latency_p95_ms"`
+	LatencyP99  float64 `json:"latency_p99_ms"`
+	LatencyMean float64 `json:"latency_mean_ms"`
+	LatencyMin  float64 `json:"latency_min_ms"`
+	LatencyMax  float64 `json:"latency_max_ms"`
 
-	TTFBP50             float64            `json:"ttfb_p50_ms"`
-	TTFBP95             float64            `json:"ttfb_p95_ms"`
-	TTFBP99             float64            `json:"ttfb_p99_ms"`
+	TTFBP50 float64 `json:"ttfb_p50_ms"`
+	TTFBP95 float64 `json:"ttfb_p95_ms"`
+	TTFBP99 float64 `json:"ttfb_p99_ms"`
 
 	// Throughput metrics
-	RequestsPerSecond   float64            `json:"requests_per_second"`
-	BytesPerSecond      float64            `json:"bytes_per_second"`
+	RequestsPerSecond float64 `json:"requests_per_second"`
+	BytesPerSecond    float64 `json:"bytes_per_second"`
 
 	// Error metrics
-	TotalRequests       int                `json:"total_requests"`
-	SuccessfulRequests  int                `json:"successful_requests"`
-	FailedRequests      int                `json:"failed_requests"`
-	ErrorRate           float64            `json:"error_rate"`
+	TotalRequests      int     `json:"total_requests"`
+	SuccessfulRequests int     `json:"successful_requests"`
+	FailedRequests     int     `json:"failed_requests"`
+	ErrorRate          float64 `json:"error_rate"`
 
 	// Connection pool metrics
-	ConnectionReuseRate float64            `json:"connection_reuse_rate"`
+	ConnectionReuseRate float64 `json:"connection_reuse_rate"`
 
 	// System metrics
-	UptimeSeconds       float64            `json:"uptime_seconds"`
+	UptimeSeconds float64 `json:"uptime_seconds"`
 
 	// Performance grade
-	PerformanceGrade    string             `json:"performance_grade"`
-	PerformanceScore    int                `json:"performance_score"`
+	PerformanceGrade string `json:"performance_grade"`
+	PerformanceScore int    `json:"performance_score"`
 }
 
 // MetricsCollector aggregates metrics from all system components
 type MetricsCollector struct {
 	// Component references
-	benchmarker        *Benchmarker
-	cache              *LRUCache
+	benchmarker *Benchmarker
+	cache       *LRUCache
 
 	// Historical data
-	snapshots          []MonitoringSnapshot
-	maxSnapshots       int
+	snapshots    []MonitoringSnapshot
+	maxSnapshots int
 
 	// Current metrics
-	currentSnapshot    *MonitoringSnapshot
+	currentSnapshot     *MonitoringSnapshot
 	lastBenchmarkResult *BenchmarkResult
 
 	// Synchronization
-	mu                 sync.RWMutex
+	mu sync.RWMutex
 
 	// Timing
-	collectionStart    time.Time
-	lastCollection     time.Time
+	collectionStart time.Time
+	lastCollection  time.Time
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -291,15 +291,15 @@ func (mc *MetricsCollector) GetMetricsSummary() map[string]interface{} {
 
 	return map[string]interface{}{
 		"cache": map[string]interface{}{
-			"hit_ratio":      snapshot.CacheHitRatio,
-			"size":           snapshot.CacheSize,
-			"capacity":       snapshot.CacheCapacity,
+			"hit_ratio":       snapshot.CacheHitRatio,
+			"size":            snapshot.CacheSize,
+			"capacity":        snapshot.CacheCapacity,
 			"memory_usage_mb": snapshot.CacheMemoryUsageMB,
 		},
 		"latency": map[string]interface{}{
-			"p50_ms": snapshot.LatencyP50,
-			"p95_ms": snapshot.LatencyP95,
-			"p99_ms": snapshot.LatencyP99,
+			"p50_ms":  snapshot.LatencyP50,
+			"p95_ms":  snapshot.LatencyP95,
+			"p99_ms":  snapshot.LatencyP99,
 			"mean_ms": snapshot.LatencyMean,
 		},
 		"throughput": map[string]interface{}{
@@ -307,9 +307,9 @@ func (mc *MetricsCollector) GetMetricsSummary() map[string]interface{} {
 			"bytes_per_second":    snapshot.BytesPerSecond,
 		},
 		"errors": map[string]interface{}{
-			"error_rate":          snapshot.ErrorRate,
-			"total_requests":      snapshot.TotalRequests,
-			"failed_requests":     snapshot.FailedRequests,
+			"error_rate":      snapshot.ErrorRate,
+			"total_requests":  snapshot.TotalRequests,
+			"failed_requests": snapshot.FailedRequests,
 		},
 		"performance": map[string]interface{}{
 			"grade": snapshot.PerformanceGrade,
@@ -343,7 +343,7 @@ func (mc *MetricsCollector) GetTrendAnalysis(duration time.Duration) map[string]
 	last := relevantSnapshots[len(relevantSnapshots)-1]
 
 	return map[string]interface{}{
-		"period": duration.String(),
+		"period":  duration.String(),
 		"samples": len(relevantSnapshots),
 		"cache_hit_ratio": map[string]interface{}{
 			"start":  first.CacheHitRatio,
@@ -379,14 +379,14 @@ func (mc *MetricsCollector) SaveReport(filepath string) error {
 	defer mc.mu.RUnlock()
 
 	report := map[string]interface{}{
-		"generated_at":      time.Now(),
-		"uptime_seconds":    time.Since(mc.collectionStart).Seconds(),
-		"current_snapshot":  mc.currentSnapshot,
-		"total_snapshots":   len(mc.snapshots),
-		"metrics_summary":   mc.GetMetricsSummary(),
-		"trend_analysis_1h": mc.GetTrendAnalysis(1 * time.Hour),
+		"generated_at":       time.Now(),
+		"uptime_seconds":     time.Since(mc.collectionStart).Seconds(),
+		"current_snapshot":   mc.currentSnapshot,
+		"total_snapshots":    len(mc.snapshots),
+		"metrics_summary":    mc.GetMetricsSummary(),
+		"trend_analysis_1h":  mc.GetTrendAnalysis(1 * time.Hour),
 		"trend_analysis_24h": mc.GetTrendAnalysis(24 * time.Hour),
-		"snapshots":         mc.snapshots,
+		"snapshots":          mc.snapshots,
 	}
 
 	data, err := json.MarshalIndent(report, "", "  ")

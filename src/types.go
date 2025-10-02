@@ -40,7 +40,7 @@ type BenchmarkEngine struct {
 
 // BenchmarkStats contains benchmark statistics
 type BenchmarkStats struct {
-	TotalRequests int64 `json:"total_requests"`
+	TotalRequests int64   `json:"total_requests"`
 	SuccessRate   float64 `json:"success_rate"`
 }
 
@@ -58,10 +58,10 @@ func (be *BenchmarkEngine) Run(config *BenchmarkRunConfig) (*BenchmarkResult, er
 		Concurrency:   config.Concurrency,
 		Duration:      time.Second,
 		Latency: LatencyStats{
-			P50:     100.0,  // milliseconds
-			P95:     200.0,  // milliseconds
-			P99:     300.0,  // milliseconds
-			Mean:    120.0,  // milliseconds
+			P50:  100.0, // milliseconds
+			P95:  200.0, // milliseconds
+			P99:  300.0, // milliseconds
+			Mean: 120.0, // milliseconds
 		},
 		Throughput: ThroughputStats{
 			RequestsPerSecond: 50.0,
@@ -78,8 +78,8 @@ func (be *BenchmarkEngine) RunBaseline(config *BenchmarkRunConfig) (*BenchmarkRe
 	}
 
 	// Make baseline slightly slower
-	result.Latency.P50 = 180.0  // milliseconds
-	result.Latency.P95 = 350.0  // milliseconds
+	result.Latency.P50 = 180.0 // milliseconds
+	result.Latency.P95 = 350.0 // milliseconds
 	result.Throughput.RequestsPerSecond = 35.0
 
 	return result, nil
@@ -131,10 +131,10 @@ func (be *BenchmarkEngine) generateBenchmarkResult(config *BenchmarkRunConfig, m
 		StartTime:     start,
 		EndTime:       end,
 		Latency: LatencyStats{
-			P50:     avgLatencyMs,
-			P95:     avgLatencyMs + 50.0,  // +50ms
-			P99:     avgLatencyMs + 100.0, // +100ms
-			Mean:    avgLatencyMs,
+			P50:  avgLatencyMs,
+			P95:  avgLatencyMs + 50.0,  // +50ms
+			P99:  avgLatencyMs + 100.0, // +100ms
+			Mean: avgLatencyMs,
 		},
 		Throughput: ThroughputStats{
 			RequestsPerSecond: throughput,
@@ -145,15 +145,15 @@ func (be *BenchmarkEngine) generateBenchmarkResult(config *BenchmarkRunConfig, m
 
 // LatencyStats contains latency statistics
 type LatencyStats struct {
-	Min               float64       `json:"min_ms"`
-	Max               float64       `json:"max_ms"`
-	Mean              float64       `json:"mean_ms"`
-	Median            float64       `json:"median_ms"`
-	P50               float64       `json:"p50_ms"`
-	P95               float64       `json:"p95_ms"`
-	P99               float64       `json:"p99_ms"`
-	StdDev            float64       `json:"std_dev_ms"`
-	Samples           int           `json:"samples"`
+	Min     float64 `json:"min_ms"`
+	Max     float64 `json:"max_ms"`
+	Mean    float64 `json:"mean_ms"`
+	Median  float64 `json:"median_ms"`
+	P50     float64 `json:"p50_ms"`
+	P95     float64 `json:"p95_ms"`
+	P99     float64 `json:"p99_ms"`
+	StdDev  float64 `json:"std_dev_ms"`
+	Samples int     `json:"samples"`
 }
 
 // ThroughputStats contains throughput statistics
@@ -163,18 +163,18 @@ type ThroughputStats struct {
 
 // HTTP2Client is a functional HTTP/2 client wrapper
 type HTTP2Client struct {
-	config           *HTTP2ClientConfig
-	client           *http.Client
+	config *HTTP2ClientConfig
+	client *http.Client
 	// functionalClient *FunctionalHTTP2Client // DISABLED - functional implementation not used
 }
 
 // HTTP2ClientConfig holds HTTP/2 client configuration
 type HTTP2ClientConfig struct {
 	MaxConnectionsPerHost int
-	IdleConnTimeout      time.Duration
-	TLSHandshakeTimeout  time.Duration
-	DisableCompression   bool
-	EnableHTTP2Push      bool
+	IdleConnTimeout       time.Duration
+	TLSHandshakeTimeout   time.Duration
+	DisableCompression    bool
+	EnableHTTP2Push       bool
 }
 
 // HTTP2RequestTiming contains HTTP/2 request timing
@@ -209,12 +209,12 @@ func (c *HTTP2Client) Do(req *http.Request) (*http.Response, error) {
 func (c *HTTP2Client) GetLastRequestTiming() *HTTP2RequestTiming {
 	// Return stub data (functional implementation disabled)
 	return &HTTP2RequestTiming{
-		DNSLatency:       5 * time.Millisecond,
-		ConnectLatency:   10 * time.Millisecond,
-		TLSLatency:       20 * time.Millisecond,
-		TTFBLatency:      50 * time.Millisecond,
+		DNSLatency:        5 * time.Millisecond,
+		ConnectLatency:    10 * time.Millisecond,
+		TLSLatency:        20 * time.Millisecond,
+		TTFBLatency:       50 * time.Millisecond,
 		ProcessingLatency: 100 * time.Millisecond,
-		ConnectionReused: true,
+		ConnectionReused:  true,
 	}
 }
 
@@ -225,7 +225,7 @@ func (c *HTTP2Client) Close() error {
 
 // Cache is a functional cache implementation with LRU and TTL
 type Cache struct {
-	config         *CacheConfig
+	config *CacheConfig
 	// functionalCache *FunctionalCache // DISABLED - functional implementation not used
 }
 

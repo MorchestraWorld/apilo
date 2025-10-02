@@ -14,31 +14,31 @@ import (
 // MemoryBoundedCache provides a cache with strict memory limits and GC optimization
 type MemoryBoundedCache struct {
 	// Core cache components
-	mu           sync.RWMutex
-	items        map[string]*CacheElement
-	lru          *list.List
+	mu    sync.RWMutex
+	items map[string]*CacheElement
+	lru   *list.List
 
 	// Memory management
-	maxMemoryBytes   int64
-	currentMemory    int64
-	itemCount        int64
+	maxMemoryBytes int64
+	currentMemory  int64
+	itemCount      int64
 
 	// GC optimization
-	gcThreshold      int64    // Memory threshold to trigger GC
-	gcRunning        int32    // Atomic flag for GC in progress
-	lastGCRun        time.Time
-	gcInterval       time.Duration
+	gcThreshold int64 // Memory threshold to trigger GC
+	gcRunning   int32 // Atomic flag for GC in progress
+	lastGCRun   time.Time
+	gcInterval  time.Duration
 
 	// Memory pressure management
-	memoryPressure   float64  // 0.0 to 1.0, indicates memory pressure
-	evictionRate     float64  // Dynamic eviction rate based on pressure
+	memoryPressure float64 // 0.0 to 1.0, indicates memory pressure
+	evictionRate   float64 // Dynamic eviction rate based on pressure
 
 	// Monitoring and metrics
-	metrics          *EnhancedCacheMetrics
-	memoryTracker    *MemoryTracker
+	metrics       *EnhancedCacheMetrics
+	memoryTracker *MemoryTracker
 
 	// Configuration
-	config           *MemoryBoundedConfig
+	config *MemoryBoundedConfig
 }
 
 // CacheElement represents an enhanced cache element with memory tracking
@@ -69,51 +69,51 @@ type MemoryBoundedConfig struct {
 // EnhancedCacheMetrics tracks comprehensive cache metrics
 type EnhancedCacheMetrics struct {
 	// Memory metrics
-	currentMemoryBytes   int64
-	peakMemoryBytes      int64
-	memoryPressureValue  float64
-	gcRunCount           int64
-	evictionCount        int64
+	currentMemoryBytes  int64
+	peakMemoryBytes     int64
+	memoryPressureValue float64
+	gcRunCount          int64
+	evictionCount       int64
 
 	// Performance metrics
-	hitCount             int64
-	missCount            int64
-	setCount             int64
-	deleteCount          int64
+	hitCount    int64
+	missCount   int64
+	setCount    int64
+	deleteCount int64
 
 	// GC metrics
-	gcDuration           time.Duration
-	lastGCTime           time.Time
-	memoryFreedBytes     int64
+	gcDuration       time.Duration
+	lastGCTime       time.Time
+	memoryFreedBytes int64
 
 	// Access patterns
-	avgAccessCount       float64
-	hotKeyCount          int64
-	coldKeyEvictions     int64
+	avgAccessCount   float64
+	hotKeyCount      int64
+	coldKeyEvictions int64
 
-	mutex                sync.RWMutex
+	mutex sync.RWMutex
 }
 
 // MemoryTracker provides advanced memory usage tracking
 type MemoryTracker struct {
-	samples            []MemorySample
-	maxSamples         int
-	currentIndex       int
-	mutex              sync.RWMutex
+	samples      []MemorySample
+	maxSamples   int
+	currentIndex int
+	mutex        sync.RWMutex
 
 	// Memory trend analysis
-	trendDirection     MemoryTrend
-	averageUsage       int64
-	peakUsage          int64
-	growthRate         float64
+	trendDirection MemoryTrend
+	averageUsage   int64
+	peakUsage      int64
+	growthRate     float64
 }
 
 // MemorySample represents a memory usage sample
 type MemorySample struct {
-	timestamp     time.Time
-	memoryBytes   int64
-	itemCount     int64
-	gcRunning     bool
+	timestamp   time.Time
+	memoryBytes int64
+	itemCount   int64
+	gcRunning   bool
 }
 
 // MemoryTrend indicates memory usage trend
@@ -133,14 +133,14 @@ func NewMemoryBoundedCache(config *MemoryBoundedConfig) *MemoryBoundedCache {
 	}
 
 	cache := &MemoryBoundedCache{
-		items:            make(map[string]*CacheElement),
-		lru:              list.New(),
-		maxMemoryBytes:   config.MaxMemoryMB * 1024 * 1024, // Convert MB to bytes
-		gcThreshold:      int64(float64(config.MaxMemoryMB*1024*1024) * config.GCThresholdPercent),
-		gcInterval:       config.GCInterval,
-		config:           config,
-		metrics:          NewEnhancedCacheMetrics(),
-		memoryTracker:    NewMemoryTracker(1000), // Keep 1000 samples
+		items:          make(map[string]*CacheElement),
+		lru:            list.New(),
+		maxMemoryBytes: config.MaxMemoryMB * 1024 * 1024, // Convert MB to bytes
+		gcThreshold:    int64(float64(config.MaxMemoryMB*1024*1024) * config.GCThresholdPercent),
+		gcInterval:     config.GCInterval,
+		config:         config,
+		metrics:        NewEnhancedCacheMetrics(),
+		memoryTracker:  NewMemoryTracker(1000), // Keep 1000 samples
 	}
 
 	// Start background memory management
@@ -487,31 +487,31 @@ func (mbc *MemoryBoundedCache) GetMemoryStats() MemoryStats {
 	defer mbc.mu.RUnlock()
 
 	return MemoryStats{
-		CurrentMemoryBytes:  mbc.currentMemory,
-		MaxMemoryBytes:      mbc.maxMemoryBytes,
-		MemoryPressure:      mbc.memoryPressure,
-		ItemCount:           mbc.itemCount,
-		MemoryUtilization:   float64(mbc.currentMemory) / float64(mbc.maxMemoryBytes),
-		GCRunCount:          atomic.LoadInt64(&mbc.metrics.gcRunCount),
-		EvictionCount:       atomic.LoadInt64(&mbc.metrics.evictionCount),
-		MemoryFreedBytes:    atomic.LoadInt64(&mbc.metrics.memoryFreedBytes),
-		HitRatio:            mbc.calculateHitRatio(),
-		Trend:               mbc.memoryTracker.GetTrend(),
+		CurrentMemoryBytes: mbc.currentMemory,
+		MaxMemoryBytes:     mbc.maxMemoryBytes,
+		MemoryPressure:     mbc.memoryPressure,
+		ItemCount:          mbc.itemCount,
+		MemoryUtilization:  float64(mbc.currentMemory) / float64(mbc.maxMemoryBytes),
+		GCRunCount:         atomic.LoadInt64(&mbc.metrics.gcRunCount),
+		EvictionCount:      atomic.LoadInt64(&mbc.metrics.evictionCount),
+		MemoryFreedBytes:   atomic.LoadInt64(&mbc.metrics.memoryFreedBytes),
+		HitRatio:           mbc.calculateHitRatio(),
+		Trend:              mbc.memoryTracker.GetTrend(),
 	}
 }
 
 // MemoryStats represents comprehensive memory statistics
 type MemoryStats struct {
-	CurrentMemoryBytes  int64       `json:"current_memory_bytes"`
-	MaxMemoryBytes      int64       `json:"max_memory_bytes"`
-	MemoryPressure      float64     `json:"memory_pressure"`
-	ItemCount           int64       `json:"item_count"`
-	MemoryUtilization   float64     `json:"memory_utilization"`
-	GCRunCount          int64       `json:"gc_run_count"`
-	EvictionCount       int64       `json:"eviction_count"`
-	MemoryFreedBytes    int64       `json:"memory_freed_bytes"`
-	HitRatio            float64     `json:"hit_ratio"`
-	Trend               MemoryTrend `json:"trend"`
+	CurrentMemoryBytes int64       `json:"current_memory_bytes"`
+	MaxMemoryBytes     int64       `json:"max_memory_bytes"`
+	MemoryPressure     float64     `json:"memory_pressure"`
+	ItemCount          int64       `json:"item_count"`
+	MemoryUtilization  float64     `json:"memory_utilization"`
+	GCRunCount         int64       `json:"gc_run_count"`
+	EvictionCount      int64       `json:"eviction_count"`
+	MemoryFreedBytes   int64       `json:"memory_freed_bytes"`
+	HitRatio           float64     `json:"hit_ratio"`
+	Trend              MemoryTrend `json:"trend"`
 }
 
 // calculateHitRatio calculates cache hit ratio

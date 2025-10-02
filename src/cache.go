@@ -11,16 +11,16 @@ import (
 
 // CacheEntry represents a single cached item with metadata
 type CacheEntry struct {
-	Key          string        // Cache key (typically URL + params hash)
-	Value        []byte        // Cached response body
-	StatusCode   int           // HTTP status code
+	Key          string            // Cache key (typically URL + params hash)
+	Value        []byte            // Cached response body
+	StatusCode   int               // HTTP status code
 	Headers      map[string]string // Important response headers
-	Size         int64         // Entry size in bytes
-	CreatedAt    time.Time     // When entry was created
-	LastAccessed time.Time     // Last access timestamp
-	AccessCount  int64         // Number of times accessed
-	TTL          time.Duration // Time-to-live duration
-	ExpiresAt    time.Time     // Absolute expiration time
+	Size         int64             // Entry size in bytes
+	CreatedAt    time.Time         // When entry was created
+	LastAccessed time.Time         // Last access timestamp
+	AccessCount  int64             // Number of times accessed
+	TTL          time.Duration     // Time-to-live duration
+	ExpiresAt    time.Time         // Absolute expiration time
 }
 
 // IsExpired checks if the cache entry has expired
@@ -62,14 +62,14 @@ func (k *CacheKey) Hash() string {
 
 // LRUCache implements a thread-safe Least Recently Used cache
 type LRUCache struct {
-	capacity     int                        // Maximum number of entries
-	maxMemory    int64                      // Maximum memory usage in bytes
-	currentSize  int64                      // Current memory usage
-	entries      map[string]*list.Element   // Hash map for O(1) lookups
-	evictionList *list.List                 // Doubly linked list for LRU ordering
-	mu           sync.RWMutex               // Read-write mutex for thread safety
-	metrics      *CacheMetrics              // Performance metrics
-	policy       CachePolicy                // Eviction and TTL policy
+	capacity     int                                 // Maximum number of entries
+	maxMemory    int64                               // Maximum memory usage in bytes
+	currentSize  int64                               // Current memory usage
+	entries      map[string]*list.Element            // Hash map for O(1) lookups
+	evictionList *list.List                          // Doubly linked list for LRU ordering
+	mu           sync.RWMutex                        // Read-write mutex for thread safety
+	metrics      *CacheMetrics                       // Performance metrics
+	policy       CachePolicy                         // Eviction and TTL policy
 	onEvict      func(key string, entry *CacheEntry) // Eviction callback
 }
 
@@ -295,15 +295,15 @@ func (c *LRUCache) GetStats() map[string]interface{} {
 	defer c.mu.RUnlock()
 
 	return map[string]interface{}{
-		"size":          len(c.entries),
-		"capacity":      c.capacity,
-		"memory_usage":  c.currentSize,
-		"max_memory":    c.maxMemory,
+		"size":               len(c.entries),
+		"capacity":           c.capacity,
+		"memory_usage":       c.currentSize,
+		"max_memory":         c.maxMemory,
 		"memory_utilization": float64(c.currentSize) / float64(c.maxMemory) * 100,
-		"hit_ratio":     c.metrics.HitRatio(),
-		"total_gets":    c.metrics.TotalGets(),
-		"total_hits":    c.metrics.TotalHits(),
-		"total_misses":  c.metrics.TotalMisses(),
+		"hit_ratio":          c.metrics.HitRatio(),
+		"total_gets":         c.metrics.TotalGets(),
+		"total_hits":         c.metrics.TotalHits(),
+		"total_misses":       c.metrics.TotalMisses(),
 	}
 }
 

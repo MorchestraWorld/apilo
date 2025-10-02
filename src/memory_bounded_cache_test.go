@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -12,14 +11,14 @@ import (
 // TestMemoryBoundedCacheBasicOperations tests basic cache operations
 func TestMemoryBoundedCacheBasicOperations(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         1, // 1MB limit
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   10,
-		MemoryCheckInterval: time.Second,
+		MaxMemoryMB:          1, // 1MB limit
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    10,
+		MemoryCheckInterval:  time.Second,
 		EnableGCOptimization: false, // Disable for predictable testing
-		EnableMemoryTracker: false,
-		PressureThreshold:   0.85,
+		EnableMemoryTracker:  false,
+		PressureThreshold:    0.85,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -48,14 +47,14 @@ func TestMemoryBoundedCacheBasicOperations(t *testing.T) {
 // TestMemoryBoundedCacheMemoryLimit tests memory limit enforcement
 func TestMemoryBoundedCacheMemoryLimit(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         1, // 1MB limit
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   50,
-		MemoryCheckInterval: time.Second,
+		MaxMemoryMB:          1, // 1MB limit
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    50,
+		MemoryCheckInterval:  time.Second,
 		EnableGCOptimization: false,
-		EnableMemoryTracker: false,
-		PressureThreshold:   0.85,
+		EnableMemoryTracker:  false,
+		PressureThreshold:    0.85,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -174,14 +173,14 @@ func TestMemoryBoundedCacheConcurrency(t *testing.T) {
 // TestMemoryBoundedCacheGCOptimization tests GC optimization features
 func TestMemoryBoundedCacheGCOptimization(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         5, // 5MB limit
-		GCThresholdPercent:  0.7,
-		GCInterval:          100 * time.Millisecond,
-		EvictionBatchSize:   20,
-		MemoryCheckInterval: 50 * time.Millisecond,
+		MaxMemoryMB:          5, // 5MB limit
+		GCThresholdPercent:   0.7,
+		GCInterval:           100 * time.Millisecond,
+		EvictionBatchSize:    20,
+		MemoryCheckInterval:  50 * time.Millisecond,
 		EnableGCOptimization: true,
-		EnableMemoryTracker: true,
-		PressureThreshold:   0.8,
+		EnableMemoryTracker:  true,
+		PressureThreshold:    0.8,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -221,14 +220,14 @@ func TestMemoryBoundedCacheGCOptimization(t *testing.T) {
 // TestMemoryBoundedCacheMemoryPressure tests memory pressure handling
 func TestMemoryBoundedCacheMemoryPressure(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         2, // 2MB limit for testing pressure
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   10,
-		MemoryCheckInterval: 100 * time.Millisecond,
+		MaxMemoryMB:          2, // 2MB limit for testing pressure
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    10,
+		MemoryCheckInterval:  100 * time.Millisecond,
 		EnableGCOptimization: false,
-		EnableMemoryTracker: true,
-		PressureThreshold:   0.8,
+		EnableMemoryTracker:  true,
+		PressureThreshold:    0.8,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -271,14 +270,14 @@ func TestMemoryBoundedCacheMemoryPressure(t *testing.T) {
 // TestMemoryBoundedCacheEvictionStrategy tests eviction strategies
 func TestMemoryBoundedCacheEvictionStrategy(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         1, // 1MB limit
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   5,
-		MemoryCheckInterval: time.Second,
+		MaxMemoryMB:          1, // 1MB limit
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    5,
+		MemoryCheckInterval:  time.Second,
 		EnableGCOptimization: false,
-		EnableMemoryTracker: false,
-		PressureThreshold:   0.85,
+		EnableMemoryTracker:  false,
+		PressureThreshold:    0.85,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -353,8 +352,8 @@ func TestMemoryBoundedCacheStats(t *testing.T) {
 	}
 
 	// Perform some gets (hits and misses)
-	cache.Get("stats_key1") // Hit
-	cache.Get("stats_key2") // Hit
+	cache.Get("stats_key1")   // Hit
+	cache.Get("stats_key2")   // Hit
 	cache.Get("nonexistent1") // Miss
 	cache.Get("nonexistent2") // Miss
 
@@ -387,14 +386,14 @@ func TestMemoryBoundedCacheStats(t *testing.T) {
 // TestMemoryBoundedCacheItemTooLarge tests handling of oversized items
 func TestMemoryBoundedCacheItemTooLarge(t *testing.T) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         1, // 1MB limit
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   10,
-		MemoryCheckInterval: time.Second,
+		MaxMemoryMB:          1, // 1MB limit
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    10,
+		MemoryCheckInterval:  time.Second,
 		EnableGCOptimization: false,
-		EnableMemoryTracker: false,
-		PressureThreshold:   0.85,
+		EnableMemoryTracker:  false,
+		PressureThreshold:    0.85,
 	}
 
 	cache := NewMemoryBoundedCache(config)
@@ -422,7 +421,7 @@ func TestMemoryBoundedCacheItemTooLarge(t *testing.T) {
 // BenchmarkMemoryBoundedCacheSet benchmarks cache set operations
 func BenchmarkMemoryBoundedCacheSet(b *testing.B) {
 	config := DefaultMemoryBoundedConfig()
-	config.MaxMemoryMB = 100 // Large cache for benchmarking
+	config.MaxMemoryMB = 100            // Large cache for benchmarking
 	config.EnableGCOptimization = false // Disable for consistent benchmarking
 	config.EnableMemoryTracker = false
 
@@ -470,14 +469,14 @@ func BenchmarkMemoryBoundedCacheGet(b *testing.B) {
 // BenchmarkMemoryBoundedCacheMemoryPressure benchmarks performance under memory pressure
 func BenchmarkMemoryBoundedCacheMemoryPressure(b *testing.B) {
 	config := &MemoryBoundedConfig{
-		MaxMemoryMB:         10, // Small cache to create pressure
-		GCThresholdPercent:  0.8,
-		GCInterval:          time.Minute,
-		EvictionBatchSize:   50,
-		MemoryCheckInterval: time.Second,
+		MaxMemoryMB:          10, // Small cache to create pressure
+		GCThresholdPercent:   0.8,
+		GCInterval:           time.Minute,
+		EvictionBatchSize:    50,
+		MemoryCheckInterval:  time.Second,
 		EnableGCOptimization: true, // Enable to test real-world scenario
-		EnableMemoryTracker: true,
-		PressureThreshold:   0.85,
+		EnableMemoryTracker:  true,
+		PressureThreshold:    0.85,
 	}
 
 	cache := NewMemoryBoundedCache(config)

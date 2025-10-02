@@ -11,13 +11,13 @@ import (
 
 // PrometheusExporter exports metrics in Prometheus format
 type PrometheusExporter struct {
-	port       int
-	path       string
-	collector  *MetricsCollector
+	port      int
+	path      string
+	collector *MetricsCollector
 
-	server     *http.Server
-	mu         sync.RWMutex
-	running    bool
+	server  *http.Server
+	mu      sync.RWMutex
+	running bool
 }
 
 // NewPrometheusExporter creates a new Prometheus exporter

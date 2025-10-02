@@ -13,26 +13,26 @@ import (
 // IntegratedOptimizer manages the complete optimization stack
 type IntegratedOptimizer struct {
 	// Core components
-	client     *OptimizedClient
-	benchmark  *BenchmarkEngine
-	monitor    *Monitor
+	client    *OptimizedClient
+	benchmark *BenchmarkEngine
+	monitor   *Monitor
 
 	// Configuration
-	config     *IntegratedConfig
+	config *IntegratedConfig
 
 	// State management
-	mu         sync.RWMutex
-	running    bool
+	mu          sync.RWMutex
+	running     bool
 	initialized bool
 
 	// Lifecycle management
-	ctx        context.Context
-	cancel     context.CancelFunc
-	wg         sync.WaitGroup
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
 
 	// Performance tracking
-	startTime  time.Time
-	stats      *IntegratedStats
+	startTime time.Time
+	stats     *IntegratedStats
 }
 
 // IntegratedConfig holds configuration for the complete optimization stack
@@ -47,16 +47,16 @@ type IntegratedConfig struct {
 	MonitoringConfig *MonitoringConfig `yaml:"monitoring"`
 
 	// Integration settings
-	WarmupEnabled    bool          `yaml:"warmup_enabled"`
-	WarmupURLs       []string      `yaml:"warmup_urls"`
-	WarmupTimeout    time.Duration `yaml:"warmup_timeout"`
-	HealthCheckEnabled bool        `yaml:"health_check_enabled"`
+	WarmupEnabled       bool          `yaml:"warmup_enabled"`
+	WarmupURLs          []string      `yaml:"warmup_urls"`
+	WarmupTimeout       time.Duration `yaml:"warmup_timeout"`
+	HealthCheckEnabled  bool          `yaml:"health_check_enabled"`
 	HealthCheckInterval time.Duration `yaml:"health_check_interval"`
 
 	// Performance targets
-	TargetLatency    time.Duration `yaml:"target_latency"`
-	MinCacheHitRatio float64       `yaml:"min_cache_hit_ratio"`
-	MinConnectionReuse float64     `yaml:"min_connection_reuse"`
+	TargetLatency      time.Duration `yaml:"target_latency"`
+	MinCacheHitRatio   float64       `yaml:"min_cache_hit_ratio"`
+	MinConnectionReuse float64       `yaml:"min_connection_reuse"`
 }
 
 // DefaultIntegratedConfig returns an optimized configuration for API latency reduction
@@ -72,34 +72,34 @@ func DefaultIntegratedConfig() *IntegratedConfig {
 		HealthCheckEnabled:  true,
 		HealthCheckInterval: 30 * time.Second,
 
-		TargetLatency:       100 * time.Millisecond,
-		MinCacheHitRatio:    0.6,
-		MinConnectionReuse:  0.9,
+		TargetLatency:      100 * time.Millisecond,
+		MinCacheHitRatio:   0.6,
+		MinConnectionReuse: 0.9,
 	}
 }
 
 // IntegratedStats contains performance statistics for the complete optimization stack
 type IntegratedStats struct {
 	// Overall performance
-	StartTime        time.Time     `json:"start_time"`
-	Uptime          time.Duration `json:"uptime"`
-	TotalRequests   int64         `json:"total_requests"`
-	AverageLatency  time.Duration `json:"average_latency"`
+	StartTime      time.Time     `json:"start_time"`
+	Uptime         time.Duration `json:"uptime"`
+	TotalRequests  int64         `json:"total_requests"`
+	AverageLatency time.Duration `json:"average_latency"`
 
 	// Client statistics
-	ClientStats     *OptimizedClientStats `json:"client_stats"`
+	ClientStats *OptimizedClientStats `json:"client_stats"`
 
 	// Benchmark statistics
-	BenchmarkStats  *BenchmarkStats       `json:"benchmark_stats"`
+	BenchmarkStats *BenchmarkStats `json:"benchmark_stats"`
 
 	// Target achievement
-	LatencyTarget   bool    `json:"latency_target_met"`
-	CacheTarget     bool    `json:"cache_target_met"`
+	LatencyTarget    bool   `json:"latency_target_met"`
+	CacheTarget      bool   `json:"cache_target_met"`
 	ConnectionTarget bool   `json:"connection_target_met"`
-	OverallGrade    string  `json:"overall_grade"`
+	OverallGrade     string `json:"overall_grade"`
 
 	// Health status
-	HealthStatus    string  `json:"health_status"`
+	HealthStatus    string    `json:"health_status"`
 	LastHealthCheck time.Time `json:"last_health_check"`
 }
 
@@ -116,8 +116,8 @@ func NewIntegratedOptimizer(config *IntegratedConfig) (*IntegratedOptimizer, err
 		ctx:       ctx,
 		cancel:    cancel,
 		startTime: time.Now(),
-		stats:     &IntegratedStats{
-			StartTime: time.Now(),
+		stats: &IntegratedStats{
+			StartTime:    time.Now(),
 			HealthStatus: "initializing",
 		},
 	}
@@ -470,9 +470,9 @@ func (io *IntegratedOptimizer) RunComparisonBenchmark(config *BenchmarkRunConfig
 		Optimized: optimizedResult,
 		Baseline:  baselineResult,
 		Improvement: &ImprovementMetrics{
-			LatencyImprovement: calculateLatencyImprovement(baselineResult, optimizedResult),
+			LatencyImprovement:    calculateLatencyImprovement(baselineResult, optimizedResult),
 			ThroughputImprovement: calculateThroughputImprovement(baselineResult, optimizedResult),
-			EfficiencyScore: calculateEfficiencyScore(baselineResult, optimizedResult),
+			EfficiencyScore:       calculateEfficiencyScore(baselineResult, optimizedResult),
 		},
 	}
 
@@ -522,9 +522,9 @@ func (io *IntegratedOptimizer) GetMonitoringURL() string {
 
 // ComparisonResult contains results from optimized vs baseline comparison
 type ComparisonResult struct {
-	Optimized   *BenchmarkResult     `json:"optimized"`
-	Baseline    *BenchmarkResult     `json:"baseline"`
-	Improvement *ImprovementMetrics  `json:"improvement"`
+	Optimized   *BenchmarkResult    `json:"optimized"`
+	Baseline    *BenchmarkResult    `json:"baseline"`
+	Improvement *ImprovementMetrics `json:"improvement"`
 }
 
 // ImprovementMetrics contains improvement calculations

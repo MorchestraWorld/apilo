@@ -19,16 +19,16 @@ type IntegratedBenchmarkConfig struct {
 	*BenchmarkConfig
 
 	// Optimization settings
-	UseOptimizations    bool   `yaml:"use_optimizations"`
-	EnableHTTP2         bool   `yaml:"enable_http2"`
-	EnableCaching       bool   `yaml:"enable_caching"`
-	EnableMonitoring    bool   `yaml:"enable_monitoring"`
-	CacheWarmupEnabled  bool   `yaml:"cache_warmup_enabled"`
-	ComparisonMode      bool   `yaml:"comparison_mode"`
+	UseOptimizations   bool `yaml:"use_optimizations"`
+	EnableHTTP2        bool `yaml:"enable_http2"`
+	EnableCaching      bool `yaml:"enable_caching"`
+	EnableMonitoring   bool `yaml:"enable_monitoring"`
+	CacheWarmupEnabled bool `yaml:"cache_warmup_enabled"`
+	ComparisonMode     bool `yaml:"comparison_mode"`
 
 	// Optimization client
-	OptimizedClient     *OptimizedClient `yaml:"-"`
-	BaselineClient      *http.Client     `yaml:"-"`
+	OptimizedClient *OptimizedClient `yaml:"-"`
+	BaselineClient  *http.Client     `yaml:"-"`
 }
 
 // IntegratedBenchmarkResult contains results from both optimized and baseline runs
@@ -37,22 +37,22 @@ type IntegratedBenchmarkResult struct {
 	*BenchmarkResult
 
 	// Optimization metrics
-	OptimizationStats   *OptimizationStats `json:"optimization_stats"`
+	OptimizationStats *OptimizationStats `json:"optimization_stats"`
 
 	// Comparison results (if comparison mode enabled)
-	ComparisonResult    *ComparisonResult  `json:"comparison_result,omitempty"`
+	ComparisonResult *ComparisonResult `json:"comparison_result,omitempty"`
 
 	// Performance targets
-	TargetAchievement   *TargetAchievement `json:"target_achievement"`
+	TargetAchievement *TargetAchievement `json:"target_achievement"`
 }
 
 // OptimizationStats contains detailed statistics about optimization performance
 type OptimizationStats struct {
 	// HTTP/2 performance
 	HTTP2Stats struct {
-		ConnectionReuse     float64 `json:"connection_reuse_ratio"`
-		CompressionRatio    float64 `json:"compression_ratio"`
-		StreamUtilization   float64 `json:"stream_utilization"`
+		ConnectionReuse   float64 `json:"connection_reuse_ratio"`
+		CompressionRatio  float64 `json:"compression_ratio"`
+		StreamUtilization float64 `json:"stream_utilization"`
 	} `json:"http2_stats"`
 
 	// Cache performance
@@ -70,19 +70,19 @@ type OptimizationStats struct {
 	} `json:"monitoring_stats"`
 
 	// Overall optimization
-	TotalImprovement   float64       `json:"total_improvement_percentage"`
-	LatencyReduction   time.Duration `json:"latency_reduction"`
-	ThroughputGain     float64       `json:"throughput_gain"`
+	TotalImprovement float64       `json:"total_improvement_percentage"`
+	LatencyReduction time.Duration `json:"latency_reduction"`
+	ThroughputGain   float64       `json:"throughput_gain"`
 }
 
 // TargetAchievement tracks whether performance targets were met
 type TargetAchievement struct {
-	LatencyTarget      bool    `json:"latency_target_met"`
-	CacheHitTarget     bool    `json:"cache_hit_target_met"`
-	ConnectionTarget   bool    `json:"connection_reuse_target_met"`
-	ThroughputTarget   bool    `json:"throughput_target_met"`
-	OverallGrade       string  `json:"overall_grade"`
-	ScorePercentage    float64 `json:"score_percentage"`
+	LatencyTarget    bool    `json:"latency_target_met"`
+	CacheHitTarget   bool    `json:"cache_hit_target_met"`
+	ConnectionTarget bool    `json:"connection_reuse_target_met"`
+	ThroughputTarget bool    `json:"throughput_target_met"`
+	OverallGrade     string  `json:"overall_grade"`
+	ScorePercentage  float64 `json:"score_percentage"`
 }
 
 // IntegratedBenchmarkEngine extends the benchmark engine with optimization support
@@ -91,16 +91,16 @@ type IntegratedBenchmarkEngine struct {
 	*BenchmarkEngine
 
 	// Optimization components
-	optimizer          *IntegratedOptimizer
-	optimizedClient    *OptimizedClient
-	baselineClient     *http.Client
+	optimizer       *IntegratedOptimizer
+	optimizedClient *OptimizedClient
+	baselineClient  *http.Client
 
 	// Configuration
-	config             *IntegratedBenchmarkConfig
+	config *IntegratedBenchmarkConfig
 
 	// State management
-	mu                 sync.RWMutex
-	running            bool
+	mu      sync.RWMutex
+	running bool
 }
 
 // NewIntegratedBenchmarkEngine creates a new benchmark engine with optimization support
@@ -117,7 +117,7 @@ func NewIntegratedBenchmarkEngine(config *IntegratedBenchmarkConfig) (*Integrate
 
 	engine := &IntegratedBenchmarkEngine{
 		BenchmarkEngine: baseEngine,
-		config:         config,
+		config:          config,
 	}
 
 	// Set up optimized client if optimizations are enabled
@@ -293,8 +293,8 @@ func (ibe *IntegratedBenchmarkEngine) executeOptimizedRequest(client *OptimizedC
 
 	// Create optimized request
 	optimizedReq := &OptimizedRequest{
-		Request:      req,
-		UseCache:     ibe.config.EnableCaching,
+		Request:       req,
+		UseCache:      ibe.config.EnableCaching,
 		EnableMetrics: ibe.config.EnableMonitoring,
 	}
 
@@ -405,7 +405,7 @@ func (ibe *IntegratedBenchmarkEngine) collectOptimizationStats() (*OptimizationS
 	// Calculate overall improvement (requires baseline comparison)
 	if clientStats.AverageLatency > 0 {
 		// Estimate improvement based on cache hit ratio and connection reuse
-		cacheImprovement := stats.CacheStats.HitRatio * 0.6 // Assume 60% latency reduction for cache hits
+		cacheImprovement := stats.CacheStats.HitRatio * 0.6             // Assume 60% latency reduction for cache hits
 		connectionImprovement := stats.HTTP2Stats.ConnectionReuse * 0.1 // Assume 10% improvement for connection reuse
 		stats.TotalImprovement = (cacheImprovement + connectionImprovement) * 100
 	}

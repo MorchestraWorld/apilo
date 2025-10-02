@@ -40,11 +40,11 @@ type CircuitBreaker struct {
 	config *CircuitBreakerConfig
 
 	// State management
-	state          int32 // CircuitState stored as int32 for atomic operations
-	failureCount   int64
-	successCount   int64
-	requestCount   int64
-	lastFailTime   int64 // Unix timestamp in nanoseconds
+	state           int32 // CircuitState stored as int32 for atomic operations
+	failureCount    int64
+	successCount    int64
+	requestCount    int64
+	lastFailTime    int64 // Unix timestamp in nanoseconds
 	lastStateChange int64 // Unix timestamp in nanoseconds
 
 	// Metrics
@@ -54,9 +54,9 @@ type CircuitBreaker struct {
 	mutex sync.RWMutex
 
 	// Half-open state management
-	halfOpenRequests   int64
-	halfOpenSuccesses  int64
-	halfOpenStart      int64
+	halfOpenRequests  int64
+	halfOpenSuccesses int64
+	halfOpenStart     int64
 
 	// Generation counter for state changes
 	generation int64
@@ -65,110 +65,110 @@ type CircuitBreaker struct {
 // CircuitBreakerConfig configures the circuit breaker behavior
 type CircuitBreakerConfig struct {
 	// Failure threshold
-	FailureThreshold     int           `yaml:"failure_threshold"`
-	FailureRate          float64       `yaml:"failure_rate"`
-	MinimumRequests      int           `yaml:"minimum_requests"`
+	FailureThreshold int     `yaml:"failure_threshold"`
+	FailureRate      float64 `yaml:"failure_rate"`
+	MinimumRequests  int     `yaml:"minimum_requests"`
 
 	// Timing
-	OpenTimeout          time.Duration `yaml:"open_timeout"`
-	HalfOpenTimeout      time.Duration `yaml:"half_open_timeout"`
-	ResetTimeout         time.Duration `yaml:"reset_timeout"`
+	OpenTimeout     time.Duration `yaml:"open_timeout"`
+	HalfOpenTimeout time.Duration `yaml:"half_open_timeout"`
+	ResetTimeout    time.Duration `yaml:"reset_timeout"`
 
 	// Half-open state
-	HalfOpenMaxRequests  int           `yaml:"half_open_max_requests"`
-	HalfOpenSuccessThreshold int       `yaml:"half_open_success_threshold"`
+	HalfOpenMaxRequests      int `yaml:"half_open_max_requests"`
+	HalfOpenSuccessThreshold int `yaml:"half_open_success_threshold"`
 
 	// Advanced settings
-	ExponentialBackoff   bool          `yaml:"exponential_backoff"`
-	MaxBackoffTime      time.Duration `yaml:"max_backoff_time"`
-	BackoffMultiplier   float64       `yaml:"backoff_multiplier"`
+	ExponentialBackoff bool          `yaml:"exponential_backoff"`
+	MaxBackoffTime     time.Duration `yaml:"max_backoff_time"`
+	BackoffMultiplier  float64       `yaml:"backoff_multiplier"`
 
 	// Monitoring
-	EnableMetrics       bool          `yaml:"enable_metrics"`
-	MetricsWindowSize   int           `yaml:"metrics_window_size"`
+	EnableMetrics     bool `yaml:"enable_metrics"`
+	MetricsWindowSize int  `yaml:"metrics_window_size"`
 
 	// Custom failure detection
-	IsFailure           func(error) bool
-	ShouldTrip          func(*CircuitBreakerMetrics) bool
+	IsFailure  func(error) bool
+	ShouldTrip func(*CircuitBreakerMetrics) bool
 }
 
 // CircuitBreakerMetrics tracks circuit breaker performance
 type CircuitBreakerMetrics struct {
 	// Counters
-	TotalRequests       int64
-	SuccessfulRequests  int64
-	FailedRequests      int64
-	RejectedRequests    int64
+	TotalRequests      int64
+	SuccessfulRequests int64
+	FailedRequests     int64
+	RejectedRequests   int64
 
 	// State changes
-	StateChanges        int64
-	OpenCount           int64
-	HalfOpenCount       int64
-	ClosedCount         int64
+	StateChanges  int64
+	OpenCount     int64
+	HalfOpenCount int64
+	ClosedCount   int64
 
 	// Timing
-	SuccessRate         float64
-	FailureRate         float64
-	AverageLatency      time.Duration
-	LastFailure         time.Time
-	LastSuccess         time.Time
+	SuccessRate    float64
+	FailureRate    float64
+	AverageLatency time.Duration
+	LastFailure    time.Time
+	LastSuccess    time.Time
 
 	// Windows for rolling metrics
-	requestWindow       *RollingWindow
-	latencyWindow       *RollingWindow
+	requestWindow *RollingWindow
+	latencyWindow *RollingWindow
 
-	mutex               sync.RWMutex
+	mutex sync.RWMutex
 }
 
 // RollingWindow maintains rolling statistics
 type RollingWindow struct {
-	values   []float64
-	index    int
-	size     int
-	full     bool
-	mutex    sync.RWMutex
+	values []float64
+	index  int
+	size   int
+	full   bool
+	mutex  sync.RWMutex
 }
 
 // FailoverManager manages multiple circuit breakers and failover logic
 type FailoverManager struct {
 	// Primary and backup services
-	primary   *CircuitBreaker
-	backups   []*CircuitBreaker
+	primary *CircuitBreaker
+	backups []*CircuitBreaker
 
 	// Configuration
-	config    *FailoverConfig
+	config *FailoverConfig
 
 	// State
 	currentService int32 // Index of currently active service
 	fallbackMode   int32 // 0 = normal, 1 = fallback active
 
 	// Metrics
-	metrics   *FailoverMetrics
+	metrics *FailoverMetrics
 
 	// Health checking
 	healthChecker *HealthChecker
 
-	mutex     sync.RWMutex
+	mutex sync.RWMutex
 }
 
 // FailoverConfig configures failover behavior
 type FailoverConfig struct {
 	// Failover strategy
-	Strategy             FailoverStrategy  `yaml:"strategy"`
-	MaxRetries           int               `yaml:"max_retries"`
-	RetryDelay           time.Duration     `yaml:"retry_delay"`
+	Strategy   FailoverStrategy `yaml:"strategy"`
+	MaxRetries int              `yaml:"max_retries"`
+	RetryDelay time.Duration    `yaml:"retry_delay"`
 
 	// Health checking
-	HealthCheckInterval  time.Duration     `yaml:"health_check_interval"`
-	HealthCheckTimeout   time.Duration     `yaml:"health_check_timeout"`
+	HealthCheckInterval time.Duration `yaml:"health_check_interval"`
+	HealthCheckTimeout  time.Duration `yaml:"health_check_timeout"`
 
 	// Automatic recovery
-	AutoRecovery         bool              `yaml:"auto_recovery"`
-	RecoveryCheckInterval time.Duration    `yaml:"recovery_check_interval"`
+	AutoRecovery          bool          `yaml:"auto_recovery"`
+	RecoveryCheckInterval time.Duration `yaml:"recovery_check_interval"`
 
 	// Fallback behavior
-	EnableFallback       bool              `yaml:"enable_fallback"`
-	FallbackTimeout      time.Duration     `yaml:"fallback_timeout"`
+	EnableFallback  bool          `yaml:"enable_fallback"`
+	FallbackTimeout time.Duration `yaml:"fallback_timeout"`
 }
 
 // FailoverStrategy defines how failover should behave
@@ -183,24 +183,24 @@ const (
 
 // FailoverMetrics tracks failover performance
 type FailoverMetrics struct {
-	FailoverCount         int64
-	RecoveryCount         int64
-	FallbackActivations   int64
-	HealthCheckFailures   int64
-	TotalSwitches         int64
+	FailoverCount       int64
+	RecoveryCount       int64
+	FallbackActivations int64
+	HealthCheckFailures int64
+	TotalSwitches       int64
 
-	CurrentServiceIndex   int32
-	ServiceHealthStatus   map[int]bool
+	CurrentServiceIndex int32
+	ServiceHealthStatus map[int]bool
 
-	mutex                 sync.RWMutex
+	mutex sync.RWMutex
 }
 
 // HealthChecker performs health checks on services
 type HealthChecker struct {
-	config    *HealthCheckConfig
-	checkers  map[int]func() error
-	results   map[int]*HealthCheckResult
-	mutex     sync.RWMutex
+	config   *HealthCheckConfig
+	checkers map[int]func() error
+	results  map[int]*HealthCheckResult
+	mutex    sync.RWMutex
 }
 
 // HealthCheckConfig configures health checking
@@ -213,20 +213,20 @@ type HealthCheckConfig struct {
 
 // HealthCheckResult stores health check results
 type HealthCheckResult struct {
-	Healthy          bool
-	LastCheck        time.Time
-	ConsecutiveFails int
+	Healthy            bool
+	LastCheck          time.Time
+	ConsecutiveFails   int
 	ConsecutiveSuccess int
-	LastError        error
+	LastError          error
 }
 
 // Common errors
 var (
-	ErrCircuitOpen         = errors.New("circuit breaker is open")
+	ErrCircuitOpen           = errors.New("circuit breaker is open")
 	ErrHalfOpenLimitExceeded = errors.New("half-open request limit exceeded")
-	ErrAllServicesDown     = errors.New("all services are down")
-	ErrNoHealthyService    = errors.New("no healthy service available")
-	ErrFailoverInProgress  = errors.New("failover is in progress")
+	ErrAllServicesDown       = errors.New("all services are down")
+	ErrNoHealthyService      = errors.New("no healthy service available")
+	ErrFailoverInProgress    = errors.New("failover is in progress")
 )
 
 // NewCircuitBreaker creates a new circuit breaker
@@ -538,7 +538,7 @@ func NewFailoverManager(primary *CircuitBreaker, backups []*CircuitBreaker, conf
 		config:         config,
 		currentService: 0, // Start with primary
 		metrics:        NewFailoverMetrics(),
-		healthChecker:  NewHealthChecker(&HealthCheckConfig{
+		healthChecker: NewHealthChecker(&HealthCheckConfig{
 			Interval:           config.HealthCheckInterval,
 			Timeout:            config.HealthCheckTimeout,
 			HealthyThreshold:   2,
@@ -719,10 +719,10 @@ func DefaultCircuitBreakerConfig() *CircuitBreakerConfig {
 		HalfOpenMaxRequests:      3,
 		HalfOpenSuccessThreshold: 2,
 		ExponentialBackoff:       true,
-		MaxBackoffTime:          5 * time.Minute,
-		BackoffMultiplier:       2.0,
-		EnableMetrics:           true,
-		MetricsWindowSize:       100,
+		MaxBackoffTime:           5 * time.Minute,
+		BackoffMultiplier:        2.0,
+		EnableMetrics:            true,
+		MetricsWindowSize:        100,
 	}
 }
 

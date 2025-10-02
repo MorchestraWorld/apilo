@@ -121,10 +121,10 @@ func (s *StaticWarmup) Warmup(ctx context.Context, cache *LRUCache) error {
 
 // PredictiveWarmup implements a pattern-based predictive warmup strategy
 type PredictiveWarmup struct {
-	patterns       map[string]*AccessPattern // Historical access patterns
-	predictionWindow time.Duration            // How far ahead to predict
-	topN           int                        // Number of top predictions to warm
-	mu             sync.RWMutex
+	patterns         map[string]*AccessPattern // Historical access patterns
+	predictionWindow time.Duration             // How far ahead to predict
+	topN             int                       // Number of top predictions to warm
+	mu               sync.RWMutex
 }
 
 // NewPredictiveWarmup creates a predictive warmup strategy
@@ -331,13 +331,13 @@ func (a *AdaptiveWarmup) UpdateWeights(strategyName string, performance float64)
 
 // CacheWarmer manages cache warming operations
 type CacheWarmer struct {
-	cache         *LRUCache
-	strategy      WarmupStrategy
-	queue         *PrefetchQueue
-	running       bool
-	stopChan      chan struct{}
+	cache          *LRUCache
+	strategy       WarmupStrategy
+	queue          *PrefetchQueue
+	running        bool
+	stopChan       chan struct{}
 	warmupInterval time.Duration
-	mu            sync.Mutex
+	mu             sync.Mutex
 }
 
 // NewCacheWarmer creates a new cache warmer

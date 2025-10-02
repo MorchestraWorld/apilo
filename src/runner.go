@@ -14,35 +14,35 @@ import (
 type LoadPattern string
 
 const (
-	LoadPatternConstant    LoadPattern = "constant"    // Steady request rate
-	LoadPatternRampUp      LoadPattern = "ramp_up"     // Gradually increase load
-	LoadPatternSpike       LoadPattern = "spike"       // Sudden load increase
-	LoadPatternSinusoidal  LoadPattern = "sinusoidal"  // Wave pattern
+	LoadPatternConstant   LoadPattern = "constant"   // Steady request rate
+	LoadPatternRampUp     LoadPattern = "ramp_up"    // Gradually increase load
+	LoadPatternSpike      LoadPattern = "spike"      // Sudden load increase
+	LoadPatternSinusoidal LoadPattern = "sinusoidal" // Wave pattern
 )
 
 // BenchmarkSuite manages multiple benchmark runs with different configurations
 type BenchmarkSuite struct {
-	Name              string                `json:"name"`
-	Description       string                `json:"description"`
-	Runs              []BenchmarkRun        `json:"runs"`
-	OutputDir         string                `json:"output_dir"`
-	ComparisonBaseline string               `json:"comparison_baseline,omitempty"`
+	Name               string         `json:"name"`
+	Description        string         `json:"description"`
+	Runs               []BenchmarkRun `json:"runs"`
+	OutputDir          string         `json:"output_dir"`
+	ComparisonBaseline string         `json:"comparison_baseline,omitempty"`
 }
 
 // BenchmarkRun represents a single benchmark configuration
 type BenchmarkRun struct {
-	Name              string                `json:"name"`
-	Config            BenchmarkConfig       `json:"config"`
-	Iterations        int                   `json:"iterations"`
-	WarmupIterations  int                   `json:"warmup_iterations"`
-	LoadPattern       LoadPattern           `json:"load_pattern"`
-	Results           []*BenchmarkResult    `json:"results,omitempty"`
+	Name             string             `json:"name"`
+	Config           BenchmarkConfig    `json:"config"`
+	Iterations       int                `json:"iterations"`
+	WarmupIterations int                `json:"warmup_iterations"`
+	LoadPattern      LoadPattern        `json:"load_pattern"`
+	Results          []*BenchmarkResult `json:"results,omitempty"`
 }
 
 // BenchmarkRunner orchestrates benchmark execution with multiple iterations
 type BenchmarkRunner struct {
-	suite      *BenchmarkSuite
-	resultDir  string
+	suite     *BenchmarkSuite
+	resultDir string
 }
 
 // NewBenchmarkRunner creates a new runner for the given suite

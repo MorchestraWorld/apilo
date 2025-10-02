@@ -16,9 +16,9 @@ type Dashboard struct {
 	refreshInterval time.Duration
 	collector       *MetricsCollector
 
-	server          *http.Server
-	mu              sync.RWMutex
-	running         bool
+	server  *http.Server
+	mu      sync.RWMutex
+	running bool
 }
 
 // NewDashboard creates a new dashboard instance

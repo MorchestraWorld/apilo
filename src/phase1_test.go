@@ -20,8 +20,8 @@ func TestPhase1Integration(t *testing.T) {
 	// Create default configuration
 	config := DefaultIntegratedConfig()
 	config.BenchmarkConfig = &BenchmarkConfig{
-		TotalRequests:  50,  // Smaller test for faster execution
-		Concurrency:    5,   // Lower concurrency for stability
+		TotalRequests:  50, // Smaller test for faster execution
+		Concurrency:    5,  // Lower concurrency for stability
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -174,8 +174,8 @@ func TestPhase1Integration(t *testing.T) {
 		log.Printf("  - Success Rate: %.2f%%", result.SuccessRate)
 
 		// Check if we meet Phase 1 targets (relaxed for test)
-		if result.Latency.P50 > 500*time.Millisecond {
-			t.Errorf("P50 latency too high: %v (expected < 500ms)", result.Latency.P50)
+		if result.Latency.P50 > 500 {
+			t.Errorf("P50 latency too high: %vms (expected < 500ms)", result.Latency.P50)
 		}
 
 		if result.Throughput.RequestsPerSecond < 10 {
@@ -425,8 +425,8 @@ func validateEndToEndPerformance() error {
 		return fmt.Errorf("success rate too low: %.2f%%", result.SuccessRate)
 	}
 
-	if result.Latency.P50 > time.Second {
-		return fmt.Errorf("P50 latency too high: %v", result.Latency.P50)
+	if result.Latency.P50 > 1000 {
+		return fmt.Errorf("P50 latency too high: %vms", result.Latency.P50)
 	}
 
 	if result.Throughput.RequestsPerSecond < 5 {

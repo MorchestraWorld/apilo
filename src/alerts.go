@@ -19,13 +19,13 @@ const (
 type AlertType string
 
 const (
-	AlertTypeLatency        AlertType = "latency"
-	AlertTypeTTFB           AlertType = "ttfb"
-	AlertTypeCacheHitRatio  AlertType = "cache_hit_ratio"
-	AlertTypeCacheMemory    AlertType = "cache_memory"
-	AlertTypeErrorRate      AlertType = "error_rate"
-	AlertTypeThroughput     AlertType = "throughput"
-	AlertTypeCustom         AlertType = "custom"
+	AlertTypeLatency       AlertType = "latency"
+	AlertTypeTTFB          AlertType = "ttfb"
+	AlertTypeCacheHitRatio AlertType = "cache_hit_ratio"
+	AlertTypeCacheMemory   AlertType = "cache_memory"
+	AlertTypeErrorRate     AlertType = "error_rate"
+	AlertTypeThroughput    AlertType = "throughput"
+	AlertTypeCustom        AlertType = "custom"
 )
 
 // AlertRule defines a monitoring rule
@@ -42,32 +42,32 @@ type AlertRule struct {
 
 // Alert represents an active or historical alert
 type Alert struct {
-	Rule        AlertRule     `json:"rule"`
-	Timestamp   time.Time     `json:"timestamp"`
-	Value       float64       `json:"value"`
-	Message     string        `json:"message"`
-	Severity    AlertSeverity `json:"severity"`
-	Active      bool          `json:"active"`
-	AckedAt     *time.Time    `json:"acknowledged_at,omitempty"`
-	ResolvedAt  *time.Time    `json:"resolved_at,omitempty"`
+	Rule       AlertRule     `json:"rule"`
+	Timestamp  time.Time     `json:"timestamp"`
+	Value      float64       `json:"value"`
+	Message    string        `json:"message"`
+	Severity   AlertSeverity `json:"severity"`
+	Active     bool          `json:"active"`
+	AckedAt    *time.Time    `json:"acknowledged_at,omitempty"`
+	ResolvedAt *time.Time    `json:"resolved_at,omitempty"`
 }
 
 // AlertManager manages alert rules and active alerts
 type AlertManager struct {
-	rules          []AlertRule
-	activeAlerts   map[string]*Alert
-	alertHistory   []Alert
-	cacheMetrics   *CacheMetrics
+	rules        []AlertRule
+	activeAlerts map[string]*Alert
+	alertHistory []Alert
+	cacheMetrics *CacheMetrics
 
 	// Callbacks
-	onAlert        func(alert *Alert)
-	onResolve      func(alert *Alert)
+	onAlert   func(alert *Alert)
+	onResolve func(alert *Alert)
 
 	// Cooldown tracking
-	lastTriggered  map[string]time.Time
+	lastTriggered map[string]time.Time
 
-	mu             sync.RWMutex
-	maxHistory     int
+	mu         sync.RWMutex
+	maxHistory int
 }
 
 // NewAlertManager creates a new alert manager

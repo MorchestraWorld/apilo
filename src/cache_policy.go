@@ -21,23 +21,23 @@ type CachePolicy interface {
 
 // AccessPattern represents observed access patterns for a resource
 type AccessPattern struct {
-	Key               string        // Resource identifier
-	AccessCount       int64         // Total number of accesses
-	LastAccess        time.Time     // Last access timestamp
-	FirstAccess       time.Time     // First access timestamp
-	AverageInterval   time.Duration // Average time between accesses
-	RecentAccesses    []time.Time   // Recent access timestamps (sliding window)
-	PredictedNextUse  time.Time     // Predicted next access time
-	Volatility        float64       // Measure of access pattern stability (0-1)
+	Key              string        // Resource identifier
+	AccessCount      int64         // Total number of accesses
+	LastAccess       time.Time     // Last access timestamp
+	FirstAccess      time.Time     // First access timestamp
+	AverageInterval  time.Duration // Average time between accesses
+	RecentAccesses   []time.Time   // Recent access timestamps (sliding window)
+	PredictedNextUse time.Time     // Predicted next access time
+	Volatility       float64       // Measure of access pattern stability (0-1)
 }
 
 // DefaultPolicy implements a sensible default caching policy
 type DefaultPolicy struct {
-	BaseTTL        time.Duration // Default TTL
-	MinTTL         time.Duration // Minimum allowed TTL
-	MaxTTL         time.Duration // Maximum allowed TTL
-	MaxCacheSize   int64         // Maximum cacheable response size
-	CacheableStatusCodes map[int]bool // HTTP status codes to cache
+	BaseTTL              time.Duration // Default TTL
+	MinTTL               time.Duration // Minimum allowed TTL
+	MaxTTL               time.Duration // Maximum allowed TTL
+	MaxCacheSize         int64         // Maximum cacheable response size
+	CacheableStatusCodes map[int]bool  // HTTP status codes to cache
 }
 
 // NewDefaultPolicy creates a new default policy
@@ -330,12 +330,12 @@ func calculateVolatility(intervals []time.Duration, mean time.Duration) float64 
 
 // PolicyConfig represents serializable policy configuration
 type PolicyConfig struct {
-	Type          string        `yaml:"type" json:"type"` // "default", "adaptive", "ttl", "lfu"
-	BaseTTL       string        `yaml:"base_ttl" json:"base_ttl"`
-	MinTTL        string        `yaml:"min_ttl" json:"min_ttl"`
-	MaxTTL        string        `yaml:"max_ttl" json:"max_ttl"`
-	MaxCacheSize  int64         `yaml:"max_cache_size_mb" json:"max_cache_size_mb"`
-	MinAccessCount int64        `yaml:"min_access_count" json:"min_access_count"`
+	Type           string `yaml:"type" json:"type"` // "default", "adaptive", "ttl", "lfu"
+	BaseTTL        string `yaml:"base_ttl" json:"base_ttl"`
+	MinTTL         string `yaml:"min_ttl" json:"min_ttl"`
+	MaxTTL         string `yaml:"max_ttl" json:"max_ttl"`
+	MaxCacheSize   int64  `yaml:"max_cache_size_mb" json:"max_cache_size_mb"`
+	MinAccessCount int64  `yaml:"min_access_count" json:"min_access_count"`
 }
 
 // CreatePolicy creates a policy from configuration

@@ -50,10 +50,10 @@ type UserContext struct {
 
 // AdvancedInvalidationManager manages multiple invalidation strategies
 type AdvancedInvalidationManager struct {
-	strategies       []InvalidationStrategy
-	dependencyGraph  *DependencyGraph
-	taggedCache      *TaggedCacheIndex
-	versionManager   *VersionManager
+	strategies      []InvalidationStrategy
+	dependencyGraph *DependencyGraph
+	taggedCache     *TaggedCacheIndex
+	versionManager  *VersionManager
 	config          *InvalidationConfig
 	metrics         *InvalidationMetrics
 	mu              sync.RWMutex
@@ -61,34 +61,34 @@ type AdvancedInvalidationManager struct {
 
 // InvalidationConfig configures the invalidation manager
 type InvalidationConfig struct {
-	EnableTagBasedInvalidation    bool          `yaml:"enable_tag_based_invalidation"`
-	EnableDependencyTracking      bool          `yaml:"enable_dependency_tracking"`
+	EnableTagBasedInvalidation     bool          `yaml:"enable_tag_based_invalidation"`
+	EnableDependencyTracking       bool          `yaml:"enable_dependency_tracking"`
 	EnableVersionBasedInvalidation bool          `yaml:"enable_version_based_invalidation"`
-	EnablePatternMatching         bool          `yaml:"enable_pattern_matching"`
-	MaxDependencyDepth            int           `yaml:"max_dependency_depth"`
-	InvalidationBatchSize         int           `yaml:"invalidation_batch_size"`
-	AsyncInvalidation            bool          `yaml:"async_invalidation"`
-	InvalidationTimeout          time.Duration `yaml:"invalidation_timeout"`
+	EnablePatternMatching          bool          `yaml:"enable_pattern_matching"`
+	MaxDependencyDepth             int           `yaml:"max_dependency_depth"`
+	InvalidationBatchSize          int           `yaml:"invalidation_batch_size"`
+	AsyncInvalidation              bool          `yaml:"async_invalidation"`
+	InvalidationTimeout            time.Duration `yaml:"invalidation_timeout"`
 }
 
 // InvalidationMetrics tracks invalidation performance
 type InvalidationMetrics struct {
-	StrategyExecutions   map[string]int64
-	TotalInvalidations   int64
-	BatchInvalidations   int64
-	TagInvalidations     int64
+	StrategyExecutions      map[string]int64
+	TotalInvalidations      int64
+	BatchInvalidations      int64
+	TagInvalidations        int64
 	DependencyInvalidations int64
-	VersionInvalidations int64
-	PatternInvalidations int64
-	InvalidationLatency  time.Duration
-	mu                  sync.RWMutex
+	VersionInvalidations    int64
+	PatternInvalidations    int64
+	InvalidationLatency     time.Duration
+	mu                      sync.RWMutex
 }
 
 // TaggedCacheIndex maintains tag-to-key mappings for efficient invalidation
 type TaggedCacheIndex struct {
-	tagToKeys   map[string]map[string]bool // tag -> set of keys
-	keyToTags   map[string]map[string]bool // key -> set of tags
-	mu          sync.RWMutex
+	tagToKeys map[string]map[string]bool // tag -> set of keys
+	keyToTags map[string]map[string]bool // key -> set of tags
+	mu        sync.RWMutex
 }
 
 // DependencyGraph tracks cache entry dependencies
@@ -204,9 +204,9 @@ func (aim *AdvancedInvalidationManager) registerDefaultStrategies() {
 
 	if aim.config.EnablePatternMatching {
 		patterns := []*regexp.Regexp{
-			regexp.MustCompile(`^user:\d+:`),     // User-specific keys
-			regexp.MustCompile(`^api:v\d+:`),    // API version keys
-			regexp.MustCompile(`^temp:`),         // Temporary keys
+			regexp.MustCompile(`^user:\d+:`), // User-specific keys
+			regexp.MustCompile(`^api:v\d+:`), // API version keys
+			regexp.MustCompile(`^temp:`),     // Temporary keys
 		}
 
 		aim.AddStrategy(&PatternBasedInvalidationStrategy{
@@ -696,10 +696,10 @@ func DefaultInvalidationConfig() *InvalidationConfig {
 		EnableDependencyTracking:       true,
 		EnableVersionBasedInvalidation: true,
 		EnablePatternMatching:          true,
-		MaxDependencyDepth:            3,
-		InvalidationBatchSize:         100,
-		AsyncInvalidation:            false,
-		InvalidationTimeout:          30 * time.Second,
+		MaxDependencyDepth:             3,
+		InvalidationBatchSize:          100,
+		AsyncInvalidation:              false,
+		InvalidationTimeout:            30 * time.Second,
 	}
 }
 

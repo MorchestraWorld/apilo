@@ -11,12 +11,12 @@ import (
 // CacheMetrics tracks performance metrics for cache operations
 type CacheMetrics struct {
 	// Request metrics (atomic counters for thread-safe increments)
-	totalGets      int64
-	totalHits      int64
-	totalMisses    int64
-	totalInserts   int64
-	totalUpdates   int64
-	totalEvictions int64
+	totalGets        int64
+	totalHits        int64
+	totalMisses      int64
+	totalInserts     int64
+	totalUpdates     int64
+	totalEvictions   int64
 	totalExpirations int64
 
 	// Performance metrics
@@ -29,45 +29,45 @@ type CacheMetrics struct {
 	peakMemoryUsage    int64
 
 	// Time-based metrics
-	startTime          time.Time
-	lastResetTime      time.Time
+	startTime     time.Time
+	lastResetTime time.Time
 
 	// Detailed tracking
-	hitsByHour         map[int]int64
-	missByHour         map[int]int64
-	latencyBuckets     map[string]int64 // Histogram of latencies
+	hitsByHour     map[int]int64
+	missByHour     map[int]int64
+	latencyBuckets map[string]int64 // Histogram of latencies
 
 	// Synchronization
-	mu                 sync.RWMutex
+	mu sync.RWMutex
 
 	// Historical snapshots
-	snapshots          []MetricsSnapshot
-	maxSnapshots       int
+	snapshots    []MetricsSnapshot
+	maxSnapshots int
 }
 
 // MetricsSnapshot represents a point-in-time capture of metrics
 type MetricsSnapshot struct {
-	Timestamp          time.Time     `json:"timestamp"`
-	TotalGets          int64         `json:"total_gets"`
-	TotalHits          int64         `json:"total_hits"`
-	TotalMisses        int64         `json:"total_misses"`
-	HitRatio           float64       `json:"hit_ratio"`
-	MemoryUsage        int64         `json:"memory_usage_bytes"`
-	AvgAccessLatency   time.Duration `json:"avg_access_latency"`
-	RequestsPerSecond  float64       `json:"requests_per_second"`
+	Timestamp         time.Time     `json:"timestamp"`
+	TotalGets         int64         `json:"total_gets"`
+	TotalHits         int64         `json:"total_hits"`
+	TotalMisses       int64         `json:"total_misses"`
+	HitRatio          float64       `json:"hit_ratio"`
+	MemoryUsage       int64         `json:"memory_usage_bytes"`
+	AvgAccessLatency  time.Duration `json:"avg_access_latency"`
+	RequestsPerSecond float64       `json:"requests_per_second"`
 }
 
 // NewCacheMetrics creates a new metrics tracker
 func NewCacheMetrics() *CacheMetrics {
 	now := time.Now()
 	return &CacheMetrics{
-		startTime:       now,
-		lastResetTime:   now,
-		hitsByHour:      make(map[int]int64),
-		missByHour:      make(map[int]int64),
-		latencyBuckets:  make(map[string]int64),
-		snapshots:       make([]MetricsSnapshot, 0, 1000),
-		maxSnapshots:    1000,
+		startTime:        now,
+		lastResetTime:    now,
+		hitsByHour:       make(map[int]int64),
+		missByHour:       make(map[int]int64),
+		latencyBuckets:   make(map[string]int64),
+		snapshots:        make([]MetricsSnapshot, 0, 1000),
+		maxSnapshots:     1000,
 		minAccessLatency: time.Hour, // Start with a high value
 	}
 }
@@ -315,8 +315,8 @@ func (m *CacheMetrics) GetDetailedStats() map[string]interface{} {
 		"total_expirations": m.TotalExpirations(),
 
 		// Ratios
-		"hit_ratio":         m.HitRatio(),
-		"miss_ratio":        m.MissRatio(),
+		"hit_ratio":  m.HitRatio(),
+		"miss_ratio": m.MissRatio(),
 
 		// Performance
 		"avg_access_latency_ms": m.avgAccessLatency.Milliseconds(),
@@ -325,23 +325,23 @@ func (m *CacheMetrics) GetDetailedStats() map[string]interface{} {
 		"requests_per_second":   m.RequestsPerSecond(),
 
 		// Memory
-		"current_memory_bytes":  m.CurrentMemoryUsage(),
-		"peak_memory_bytes":     m.peakMemoryUsage,
-		"current_memory_mb":     float64(m.CurrentMemoryUsage()) / (1024 * 1024),
-		"peak_memory_mb":        float64(m.peakMemoryUsage) / (1024 * 1024),
+		"current_memory_bytes": m.CurrentMemoryUsage(),
+		"peak_memory_bytes":    m.peakMemoryUsage,
+		"current_memory_mb":    float64(m.CurrentMemoryUsage()) / (1024 * 1024),
+		"peak_memory_mb":       float64(m.peakMemoryUsage) / (1024 * 1024),
 
 		// Time
-		"uptime_seconds":        uptime.Seconds(),
-		"uptime_hours":          uptime.Hours(),
-		"start_time":            m.startTime,
-		"last_reset_time":       m.lastResetTime,
+		"uptime_seconds":  uptime.Seconds(),
+		"uptime_hours":    uptime.Hours(),
+		"start_time":      m.startTime,
+		"last_reset_time": m.lastResetTime,
 
 		// Hourly distribution
-		"hits_by_hour":          m.hitsByHour,
-		"misses_by_hour":        m.missByHour,
+		"hits_by_hour":   m.hitsByHour,
+		"misses_by_hour": m.missByHour,
 
 		// Latency distribution
-		"latency_buckets":       m.latencyBuckets,
+		"latency_buckets": m.latencyBuckets,
 	}
 }
 

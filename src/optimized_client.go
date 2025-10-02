@@ -16,26 +16,26 @@ import (
 // OptimizedClient combines HTTP/2 client, caching, and monitoring for maximum performance
 type OptimizedClient struct {
 	// Core components
-	http2Client    *HTTP2Client
-	cache          *Cache
-	monitor        *Monitor
+	http2Client      *HTTP2Client
+	cache            *Cache
+	monitor          *Monitor
 	metricsCollector *MetricsCollector
 
 	// Configuration
-	config         *OptimizedClientConfig
+	config *OptimizedClientConfig
 
 	// State management
-	mu             sync.RWMutex
-	initialized    bool
-	warmedUp       bool
-	requestCount   int64
+	mu           sync.RWMutex
+	initialized  bool
+	warmedUp     bool
+	requestCount int64
 
 	// Performance tracking
-	totalLatency   time.Duration
-	cacheHits      int64
-	cacheMisses    int64
+	totalLatency    time.Duration
+	cacheHits       int64
+	cacheMisses     int64
 	connectionReuse int64
-	errors         int64
+	errors          int64
 }
 
 // OptimizedClientConfig holds configuration for the unified client
@@ -43,34 +43,34 @@ type OptimizedClientConfig struct {
 	// HTTP/2 Configuration
 	HTTP2Config struct {
 		MaxConnectionsPerHost int           `yaml:"max_connections_per_host"`
-		IdleConnTimeout      time.Duration `yaml:"idle_conn_timeout"`
-		TLSHandshakeTimeout  time.Duration `yaml:"tls_handshake_timeout"`
-		DisableCompression   bool          `yaml:"disable_compression"`
-		EnablePush           bool          `yaml:"enable_push"`
+		IdleConnTimeout       time.Duration `yaml:"idle_conn_timeout"`
+		TLSHandshakeTimeout   time.Duration `yaml:"tls_handshake_timeout"`
+		DisableCompression    bool          `yaml:"disable_compression"`
+		EnablePush            bool          `yaml:"enable_push"`
 	} `yaml:"http2"`
 
 	// Cache Configuration
 	CacheConfig struct {
-		Enabled      bool          `yaml:"enabled"`
-		Capacity     int           `yaml:"capacity"`
-		DefaultTTL   time.Duration `yaml:"default_ttl"`
-		PolicyType   string        `yaml:"policy_type"`
-		WarmupEnabled bool         `yaml:"warmup_enabled"`
+		Enabled       bool          `yaml:"enabled"`
+		Capacity      int           `yaml:"capacity"`
+		DefaultTTL    time.Duration `yaml:"default_ttl"`
+		PolicyType    string        `yaml:"policy_type"`
+		WarmupEnabled bool          `yaml:"warmup_enabled"`
 	} `yaml:"cache"`
 
 	// Monitoring Configuration
 	MonitoringConfig struct {
-		Enabled      bool `yaml:"enabled"`
-		DashboardPort int `yaml:"dashboard_port"`
-		AlertsEnabled bool `yaml:"alerts_enabled"`
+		Enabled           bool `yaml:"enabled"`
+		DashboardPort     int  `yaml:"dashboard_port"`
+		AlertsEnabled     bool `yaml:"alerts_enabled"`
 		PrometheusEnabled bool `yaml:"prometheus_enabled"`
 	} `yaml:"monitoring"`
 
 	// Integration Configuration
-	MaxRetries       int           `yaml:"max_retries"`
-	RetryBackoff     time.Duration `yaml:"retry_backoff"`
-	RequestTimeout   time.Duration `yaml:"request_timeout"`
-	EnableMetrics    bool          `yaml:"enable_metrics"`
+	MaxRetries     int           `yaml:"max_retries"`
+	RetryBackoff   time.Duration `yaml:"retry_backoff"`
+	RequestTimeout time.Duration `yaml:"request_timeout"`
+	EnableMetrics  bool          `yaml:"enable_metrics"`
 }
 
 // DefaultOptimizedClientConfig returns a configuration optimized for API latency reduction
@@ -78,45 +78,45 @@ func DefaultOptimizedClientConfig() *OptimizedClientConfig {
 	return &OptimizedClientConfig{
 		HTTP2Config: struct {
 			MaxConnectionsPerHost int           `yaml:"max_connections_per_host"`
-			IdleConnTimeout      time.Duration `yaml:"idle_conn_timeout"`
-			TLSHandshakeTimeout  time.Duration `yaml:"tls_handshake_timeout"`
-			DisableCompression   bool          `yaml:"disable_compression"`
-			EnablePush           bool          `yaml:"enable_push"`
+			IdleConnTimeout       time.Duration `yaml:"idle_conn_timeout"`
+			TLSHandshakeTimeout   time.Duration `yaml:"tls_handshake_timeout"`
+			DisableCompression    bool          `yaml:"disable_compression"`
+			EnablePush            bool          `yaml:"enable_push"`
 		}{
 			MaxConnectionsPerHost: 10,
-			IdleConnTimeout:      90 * time.Second,
-			TLSHandshakeTimeout:  10 * time.Second,
-			DisableCompression:   false,
-			EnablePush:           true,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			DisableCompression:    false,
+			EnablePush:            true,
 		},
 		CacheConfig: struct {
-			Enabled      bool          `yaml:"enabled"`
-			Capacity     int           `yaml:"capacity"`
-			DefaultTTL   time.Duration `yaml:"default_ttl"`
-			PolicyType   string        `yaml:"policy_type"`
-			WarmupEnabled bool         `yaml:"warmup_enabled"`
+			Enabled       bool          `yaml:"enabled"`
+			Capacity      int           `yaml:"capacity"`
+			DefaultTTL    time.Duration `yaml:"default_ttl"`
+			PolicyType    string        `yaml:"policy_type"`
+			WarmupEnabled bool          `yaml:"warmup_enabled"`
 		}{
-			Enabled:      true,
-			Capacity:     10000,
-			DefaultTTL:   5 * time.Minute,
-			PolicyType:   "adaptive",
+			Enabled:       true,
+			Capacity:      10000,
+			DefaultTTL:    5 * time.Minute,
+			PolicyType:    "adaptive",
 			WarmupEnabled: true,
 		},
 		MonitoringConfig: struct {
-			Enabled      bool `yaml:"enabled"`
-			DashboardPort int `yaml:"dashboard_port"`
-			AlertsEnabled bool `yaml:"alerts_enabled"`
+			Enabled           bool `yaml:"enabled"`
+			DashboardPort     int  `yaml:"dashboard_port"`
+			AlertsEnabled     bool `yaml:"alerts_enabled"`
 			PrometheusEnabled bool `yaml:"prometheus_enabled"`
 		}{
-			Enabled:      true,
-			DashboardPort: 8080,
-			AlertsEnabled: false,
+			Enabled:           true,
+			DashboardPort:     8080,
+			AlertsEnabled:     false,
 			PrometheusEnabled: false,
 		},
-		MaxRetries:       3,
-		RetryBackoff:     100 * time.Millisecond,
-		RequestTimeout:   30 * time.Second,
-		EnableMetrics:    true,
+		MaxRetries:     3,
+		RetryBackoff:   100 * time.Millisecond,
+		RequestTimeout: 30 * time.Second,
+		EnableMetrics:  true,
 	}
 }
 
@@ -133,10 +133,10 @@ func NewOptimizedClient(config *OptimizedClientConfig) (*OptimizedClient, error)
 	// Initialize HTTP/2 client
 	http2Config := &HTTP2ClientConfig{
 		MaxConnectionsPerHost: config.HTTP2Config.MaxConnectionsPerHost,
-		IdleConnTimeout:      config.HTTP2Config.IdleConnTimeout,
-		TLSHandshakeTimeout:  config.HTTP2Config.TLSHandshakeTimeout,
-		DisableCompression:   config.HTTP2Config.DisableCompression,
-		EnableHTTP2Push:      config.HTTP2Config.EnablePush,
+		IdleConnTimeout:       config.HTTP2Config.IdleConnTimeout,
+		TLSHandshakeTimeout:   config.HTTP2Config.TLSHandshakeTimeout,
+		DisableCompression:    config.HTTP2Config.DisableCompression,
+		EnableHTTP2Push:       config.HTTP2Config.EnablePush,
 	}
 
 	var err error
@@ -167,10 +167,10 @@ func NewOptimizedClient(config *OptimizedClientConfig) (*OptimizedClient, error)
 	// Initialize monitoring if enabled
 	if config.MonitoringConfig.Enabled {
 		monitorConfig := &MonitoringConfig{
-			DashboardEnabled:    true,
-			DashboardPort:      config.MonitoringConfig.DashboardPort,
-			AlertsEnabled:      config.MonitoringConfig.AlertsEnabled,
-			PrometheusEnabled:  config.MonitoringConfig.PrometheusEnabled,
+			DashboardEnabled:  true,
+			DashboardPort:     config.MonitoringConfig.DashboardPort,
+			AlertsEnabled:     config.MonitoringConfig.AlertsEnabled,
+			PrometheusEnabled: config.MonitoringConfig.PrometheusEnabled,
 		}
 
 		client.monitor, err = NewMonitor(monitorConfig)
@@ -188,26 +188,26 @@ func NewOptimizedClient(config *OptimizedClientConfig) (*OptimizedClient, error)
 // OptimizedRequest represents a request with optimization context
 type OptimizedRequest struct {
 	*http.Request
-	CacheKey     string
-	CacheTTL     time.Duration
-	UseCache     bool
+	CacheKey      string
+	CacheTTL      time.Duration
+	UseCache      bool
 	EnableMetrics bool
-	Metadata     map[string]interface{}
+	Metadata      map[string]interface{}
 }
 
 // OptimizedResponse represents a response with optimization metadata
 type OptimizedResponse struct {
 	*http.Response
-	CacheHit      bool
-	CacheAge      time.Duration
-	ConnectionReused bool
-	TotalLatency  time.Duration
-	DNSLatency    time.Duration
-	ConnectLatency time.Duration
-	TLSLatency    time.Duration
-	TTFBLatency   time.Duration
+	CacheHit          bool
+	CacheAge          time.Duration
+	ConnectionReused  bool
+	TotalLatency      time.Duration
+	DNSLatency        time.Duration
+	ConnectLatency    time.Duration
+	TLSLatency        time.Duration
+	TTFBLatency       time.Duration
 	ProcessingLatency time.Duration
-	Metadata      map[string]interface{}
+	Metadata          map[string]interface{}
 }
 
 // Do executes an HTTP request using all available optimizations
@@ -368,10 +368,10 @@ func (c *OptimizedClient) tryCache(req *OptimizedRequest, response *OptimizedRes
 
 	// Create optimized response from cache
 	optimized := &OptimizedResponse{
-		Response:    cachedResp,
-		CacheHit:    true,
-		CacheAge:    age,
-		Metadata:    response.Metadata,
+		Response: cachedResp,
+		CacheHit: true,
+		CacheAge: age,
+		Metadata: response.Metadata,
 	}
 
 	return optimized
@@ -544,8 +544,8 @@ func (c *OptimizedClient) WarmupCache(urls []string) error {
 		}
 
 		optimizedReq := &OptimizedRequest{
-			Request:  req,
-			UseCache: true,
+			Request:       req,
+			UseCache:      true,
 			EnableMetrics: false, // Don't count warmup in metrics
 		}
 
@@ -564,13 +564,13 @@ func (c *OptimizedClient) GetStats() *OptimizedClientStats {
 	defer c.mu.RUnlock()
 
 	stats := &OptimizedClientStats{
-		TotalRequests:    c.requestCount,
-		CacheHits:        c.cacheHits,
-		CacheMisses:      c.cacheMisses,
-		ConnectionReuse:  c.connectionReuse,
-		Errors:           c.errors,
-		Initialized:      c.initialized,
-		WarmedUp:         c.warmedUp,
+		TotalRequests:   c.requestCount,
+		CacheHits:       c.cacheHits,
+		CacheMisses:     c.cacheMisses,
+		ConnectionReuse: c.connectionReuse,
+		Errors:          c.errors,
+		Initialized:     c.initialized,
+		WarmedUp:        c.warmedUp,
 	}
 
 	if c.requestCount > 0 {
