@@ -1,0 +1,68 @@
+# API Latency Optimizer - FREE Test Endpoint Configuration
+# HTTPBin for development, testing, and configuration validation
+# NO AUTHENTICATION REQUIRED - NO COST
+
+name: "httpbin_development_benchmark"
+description: "Free test endpoint for configuration validation and development testing"
+output_dir: "./benchmarks/results/httpbin"
+
+runs:
+  - name: "quick_validation"
+    description: "Quick configuration validation - 100 requests"
+    config:
+      target_url: "https://httpbin.org/post"
+      total_requests: 100
+      concurrency: 10
+      timeout: 30s
+      keep_alive: true
+      method: "POST"
+      custom_headers:
+        content-type: "application/json"
+      body: |
+        {
+          "test": "benchmark",
+          "message": "Configuration validation test"
+        }
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "stress_test"
+    description: "High load stress test - safe for free endpoint"
+    config:
+      target_url: "https://httpbin.org/post"
+      total_requests: 1000
+      concurrency: 50
+      timeout: 30s
+      keep_alive: true
+      method: "POST"
+      custom_headers:
+        content-type: "application/json"
+      body: |
+        {
+          "test": "stress",
+          "load": "high"
+        }
+    iterations: 2
+    warmup_iterations: 1
+    load_pattern: "ramp_up"
+
+  - name: "latency_baseline"
+    description: "Measure baseline latency with minimal load"
+    config:
+      target_url: "https://httpbin.org/post"
+      total_requests: 50
+      concurrency: 1
+      timeout: 30s
+      keep_alive: true
+      method: "POST"
+      custom_headers:
+        content-type: "application/json"
+      body: |
+        {
+          "test": "latency",
+          "timestamp": "{{NOW}}"
+        }
+    iterations: 5
+    warmup_iterations: 1
+    load_pattern: "constant"
