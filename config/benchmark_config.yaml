@@ -1,0 +1,67 @@
+# API Latency Optimizer - Benchmark Configuration
+
+name: "anthropic_api_baseline"
+description: "Baseline performance measurement for Anthropic API endpoint"
+output_dir: "./benchmarks/results"
+
+# Benchmark runs with different load profiles
+runs:
+  - name: "light_load"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 100
+      concurrency: 5
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "moderate_load"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+    iterations: 3
+    warmup_iterations: 2
+    load_pattern: "constant"
+
+  - name: "high_load"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 1000
+      concurrency: 50
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+    iterations: 3
+    warmup_iterations: 2
+    load_pattern: "constant"
+
+  - name: "stress_test"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 2000
+      concurrency: 100
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+    iterations: 2
+    warmup_iterations: 1
+    load_pattern: "ramp_up"
+
+  - name: "connection_pooling_test"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 10
+      timeout: 30s
+      keep_alive: false  # Disable keep-alive to measure impact
+      method: "GET"
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"

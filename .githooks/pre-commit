@@ -1,0 +1,149 @@
+#!/bin/bash
+# Pre-commit hook to prevent false performance claims
+# Checks for performance claims in commits and validates them
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo "🔍 Pre-commit Performance Claim Validation"
+echo "==========================================="
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Performance claim keywords to detect
+PERFORMANCE_KEYWORDS=(
+    "improvement"
+    "faster"
+    "reduction"
+    "latency"
+    "throughput"
+    "performance"
+    "optimization"
+    "speed up"
+    "accelerat"
+    "% better"
+    "% faster"
+    "ms reduction"
+    "req/s"
+)
+
+# Function to check for performance claims
+check_performance_claims() {
+    local file=$1
+    local claims_found=false
+
+    for keyword in "${PERFORMANCE_KEYWORDS[@]}"; do
+        if git diff --cached "$file" | grep -i "$keyword" > /dev/null; then
+            claims_found=true
+            break
+        fi
+    done
+
+    echo "$claims_found"
+}
+
+# Function to validate statistical evidence
+validate_statistical_evidence() {
+    echo "📊 Checking for statistical validation evidence..."
+
+    # Check if validation tools exist
+    if [ ! -f "validate_performance.py" ]; then
+        echo -e "${RED}❌ Missing: validate_performance.py${NC}"
+        return 1
+    fi
+
+    if [ ! -f "performance_gate.sh" ]; then
+        echo -e "${RED}❌ Missing: performance_gate.sh${NC}"
+        return 1
+    fi
+
+    # Check for validation reports
+    VALIDATION_FILES=$(find . -name "*validation*report*" -o -name "*statistical*analysis*" 2>/dev/null || true)
+
+    if [ -z "$VALIDATION_FILES" ]; then
+        echo -e "${RED}❌ No statistical validation reports found${NC}"
+        return 1
+    fi
+
+    # Check if latest validation passed
+    LATEST_VALIDATION=$(ls -t $VALIDATION_FILES | head -n1)
+    if [ -f "$LATEST_VALIDATION" ]; then
+        if grep -q "✅ VALIDATED" "$LATEST_VALIDATION"; then
+            echo -e "${GREEN}✅ Found valid statistical validation${NC}"
+            return 0
+        else
+            echo -e "${RED}❌ Latest validation failed statistical requirements${NC}"
+            return 1
+        fi
+    fi
+
+    return 1
+}
+
+# Main validation logic
+claims_detected=false
+
+echo "🔍 Scanning staged files for performance claims..."
+
+for file in $STAGED_FILES; do
+    if [ -f "$file" ]; then
+        if [[ "$file" == *.md ]] || [[ "$file" == *.txt ]] || [[ "$file" == *.rst ]]; then
+            echo "  Checking: $file"
+
+            if [ "$(check_performance_claims "$file")" = "true" ]; then
+                echo -e "    ${YELLOW}⚠️  Performance claims detected${NC}"
+                claims_detected=true
+            else
+                echo "    ✓ No performance claims"
+            fi
+        fi
+    fi
+done
+
+if [ "$claims_detected" = "true" ]; then
+    echo
+    echo -e "${YELLOW}🚨 PERFORMANCE CLAIMS DETECTED${NC}"
+    echo "============================================"
+    echo
+    echo "This commit contains performance improvement claims."
+    echo "Statistical validation is REQUIRED before committing performance claims."
+    echo
+
+    if validate_statistical_evidence; then
+        echo
+        echo -e "${GREEN}✅ STATISTICAL VALIDATION FOUND${NC}"
+        echo "Performance claims are supported by statistical evidence."
+        echo "Commit approved."
+        exit 0
+    else
+        echo
+        echo -e "${RED}❌ STATISTICAL VALIDATION REQUIRED${NC}"
+        echo
+        echo "Performance claims detected but no valid statistical validation found."
+        echo
+        echo "REQUIRED ACTIONS:"
+        echo "1. Run statistical validation: ./performance_gate.sh"
+        echo "2. Ensure validation passes all criteria:"
+        echo "   - Sample size ≥ 30 per condition"
+        echo "   - Statistical significance (p < 0.05)"
+        echo "   - Practical significance (Cohen's d ≥ 0.5)"
+        echo "   - 95% confidence intervals"
+        echo "3. Include validation report in commit"
+        echo "4. Only commit performance claims with statistical support"
+        echo
+        echo -e "${RED}🚫 COMMIT REJECTED${NC}"
+        echo "This prevents false performance claims from entering the repository."
+        exit 1
+    fi
+else
+    echo
+    echo -e "${GREEN}✅ NO PERFORMANCE CLAIMS DETECTED${NC}"
+    echo "Commit approved - no statistical validation required."
+    exit 0
+fi

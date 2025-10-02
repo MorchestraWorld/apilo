@@ -1,0 +1,151 @@
+# API Latency Optimizer - Git Ignore File
+
+# Binaries and executables
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+api-optimizer
+api-latency-optimizer
+
+# Go build artifacts
+*.test
+*.out
+*.prof
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Dependency directories
+vendor/
+
+# Test coverage
+*.coverprofile
+coverage.out
+coverage.html
+cover.out
+cover.html
+
+# Benchmarks and performance data
+benchmarks/results/
+benchmarks/baseline/*.json
+!benchmarks/baseline/.gitkeep
+*.bench
+*.benchstat
+
+# Logs
+*.log
+logs/
+/var/log/
+
+# Configuration files with secrets
+*_secrets.yaml
+*_private.yaml
+*.env
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.project
+.classpath
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Build directories
+build/
+dist/
+out/
+
+# Memory profiles
+mem.prof
+cpu.prof
+*.pprof
+
+# Debugging
+debug.log
+debug.out
+__debug_bin
+
+# Development
+.cache/
+.local/
+.config/
+
+# Test artifacts
+testdata/output/
+*.test.log
+
+# Documentation build artifacts
+docs/_build/
+docs/.doctrees/
+site/
+
+# Production data (keep structure, ignore data)
+data/
+!data/.gitkeep
+
+# Metrics and monitoring data
+metrics/
+monitoring/
+!metrics/.gitkeep
+!monitoring/.gitkeep
+
+# Backup files
+*.bak
+*.backup
+backup/
+backups/
+
+# Lock files (Go modules are committed)
+# go.sum should be committed for reproducible builds
+
+# Personal notes and scratch files
+notes.md
+scratch/
+TODO.local.md
+
+# CI/CD artifacts
+.github/workflows/output/
+
+# Ignore compiled static assets
+static/dist/
+
+# Ignore local development overrides
+docker-compose.override.yml
+local-config.yaml
+dev-config.yaml

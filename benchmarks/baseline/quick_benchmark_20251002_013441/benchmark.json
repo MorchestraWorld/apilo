@@ -1,0 +1,187 @@
+{
+  "name": "benchmark",
+  "config": {
+    "TargetURL": "https://api.anthropic.com",
+    "TotalRequests": 100,
+    "Concurrency": 10,
+    "Timeout": 30000000000,
+    "KeepAlive": true,
+    "IncludeRawMetrics": false,
+    "CustomHeaders": null,
+    "Method": "GET",
+    "Body": null
+  },
+  "iterations": 3,
+  "warmup_iterations": 1,
+  "load_pattern": "constant",
+  "results": [
+    {
+      "target_url": "https://api.anthropic.com",
+      "total_requests": 100,
+      "concurrency": 10,
+      "duration": 2168465958,
+      "start_time": "2025-10-02T01:34:42.700519+02:00",
+      "end_time": "2025-10-02T01:34:44.868989+02:00",
+      "successful_requests": 100,
+      "failed_requests": 0,
+      "requests_per_second": 46.115549857296855,
+      "bytes_per_second": 0,
+      "latency_stats": {
+        "min_ms": 127.597,
+        "max_ms": 560.281,
+        "mean_ms": 207.37087999999997,
+        "median_ms": 184.60750000000002,
+        "p50_ms": 184.60750000000002,
+        "p95_ms": 391.4328999999999,
+        "p99_ms": 547.04074,
+        "std_dev_ms": 88.1567586881777,
+        "samples": 100
+      },
+      "ttfb_stats": {
+        "min_ms": 127.574,
+        "max_ms": 560.271,
+        "mean_ms": 207.33943000000002,
+        "median_ms": 184.58350000000002,
+        "p50_ms": 184.58350000000002,
+        "p95_ms": 391.3834999999999,
+        "p99_ms": 547.00005,
+        "std_dev_ms": 88.15763109841996,
+        "samples": 100
+      },
+      "connection_stats": {
+        "min_ms": 13.661,
+        "max_ms": 33.792,
+        "mean_ms": 23.423833333333334,
+        "median_ms": 24.411,
+        "p50_ms": 24.411,
+        "p95_ms": 33.78265,
+        "p99_ms": 33.790130000000005,
+        "std_dev_ms": 7.270248369974103,
+        "samples": 18
+      },
+      "tls_stats": {
+        "min_ms": 13.29,
+        "max_ms": 57.561,
+        "mean_ms": 37.534437499999996,
+        "median_ms": 41.414500000000004,
+        "p50_ms": 41.414500000000004,
+        "p95_ms": 56.406749999999995,
+        "p99_ms": 57.33015,
+        "std_dev_ms": 16.109470917633942,
+        "samples": 16
+      }
+    },
+    {
+      "target_url": "https://api.anthropic.com",
+      "total_requests": 100,
+      "concurrency": 10,
+      "duration": 1911988958,
+      "start_time": "2025-10-02T01:34:46.869749+02:00",
+      "end_time": "2025-10-02T01:34:48.781742+02:00",
+      "successful_requests": 99,
+      "failed_requests": 1,
+      "requests_per_second": 51.778541704318776,
+      "bytes_per_second": 0,
+      "latency_stats": {
+        "min_ms": 128.498,
+        "max_ms": 713.55,
+        "mean_ms": 180.7100101010101,
+        "median_ms": 168.964,
+        "p50_ms": 168.964,
+        "p95_ms": 319.5392,
+        "p99_ms": 370.12663999999967,
+        "std_dev_ms": 70.88518973671438,
+        "samples": 99
+      },
+      "ttfb_stats": {
+        "min_ms": 128.481,
+        "max_ms": 713.54,
+        "mean_ms": 180.67953535353536,
+        "median_ms": 168.945,
+        "p50_ms": 168.945,
+        "p95_ms": 319.5295,
+        "p99_ms": 370.1009599999997,
+        "std_dev_ms": 70.88814908482935,
+        "samples": 99
+      },
+      "connection_stats": {
+        "min_ms": 8.819,
+        "max_ms": 24.863,
+        "mean_ms": 18.224545454545456,
+        "median_ms": 18.213,
+        "p50_ms": 18.213,
+        "p95_ms": 24.7585,
+        "p99_ms": 24.8421,
+        "std_dev_ms": 4.920326289321515,
+        "samples": 11
+      },
+      "tls_stats": {
+        "min_ms": 15.389,
+        "max_ms": 87.724,
+        "mean_ms": 33.148363636363634,
+        "median_ms": 20.01,
+        "p50_ms": 20.01,
+        "p95_ms": 69.85799999999999,
+        "p99_ms": 84.1508,
+        "std_dev_ms": 21.485621840378943,
+        "samples": 11
+      }
+    },
+    {
+      "target_url": "https://api.anthropic.com",
+      "total_requests": 100,
+      "concurrency": 10,
+      "duration": 1898252584,
+      "start_time": "2025-10-02T01:34:50.782315+02:00",
+      "end_time": "2025-10-02T01:34:52.680572+02:00",
+      "successful_requests": 100,
+      "failed_requests": 0,
+      "requests_per_second": 52.68002838130207,
+      "bytes_per_second": 0,
+      "latency_stats": {
+        "min_ms": 129.126,
+        "max_ms": 679.538,
+        "mean_ms": 184.79813000000001,
+        "median_ms": 164.36399999999998,
+        "p50_ms": 164.36399999999998,
+        "p95_ms": 290.76604999999995,
+        "p99_ms": 663.4564399999999,
+        "std_dev_ms": 86.3943263740918,
+        "samples": 100
+      },
+      "ttfb_stats": {
+        "min_ms": 129.103,
+        "max_ms": 679.521,
+        "mean_ms": 184.76900999999995,
+        "median_ms": 164.3275,
+        "p50_ms": 164.3275,
+        "p95_ms": 290.72489999999993,
+        "p99_ms": 663.44142,
+        "std_dev_ms": 86.39501539099291,
+        "samples": 100
+      },
+      "connection_stats": {
+        "min_ms": 13.164,
+        "max_ms": 61.949,
+        "mean_ms": 28.642812499999998,
+        "median_ms": 23.2665,
+        "p50_ms": 23.2665,
+        "p95_ms": 52.707499999999996,
+        "p99_ms": 60.100699999999996,
+        "std_dev_ms": 14.54007831486281,
+        "samples": 16
+      },
+      "tls_stats": {
+        "min_ms": 20.961,
+        "max_ms": 73.614,
+        "mean_ms": 45.32442857142858,
+        "median_ms": 43.803,
+        "p50_ms": 43.803,
+        "p95_ms": 72.13265,
+        "p99_ms": 73.31773000000001,
+        "std_dev_ms": 19.331142009404285,
+        "samples": 14
+      }
+    }
+  ]
+}

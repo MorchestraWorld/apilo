@@ -1,0 +1,240 @@
+# Monitoring Configuration for API Latency Optimizer
+# This file configures the comprehensive monitoring framework
+
+name: "production_monitoring"
+description: "Production monitoring configuration with full observability"
+
+# Metrics Collection Settings
+metrics:
+  collection_interval: 5s      # How often to collect metrics
+  snapshot_interval: 30s       # How often to capture snapshots
+  cleanup_interval: 5m         # How often to clean up old data
+  retention_period: 24h        # How long to keep historical data
+  max_snapshots: 1000          # Maximum number of snapshots to retain
+
+# Dashboard Settings
+dashboard:
+  enabled: true
+  port: 8080                   # Dashboard HTTP port
+  refresh_interval: 2s         # Auto-refresh interval
+  theme: "dark"                # UI theme: dark, light
+
+# Alerting Settings
+alerting:
+  enabled: true
+  check_interval: 10s          # How often to check alert rules
+
+  # Alert Rules
+  rules:
+    # Latency Alerts
+    - name: high_latency_p95
+      description: "P95 latency exceeds 500ms"
+      type: latency
+      threshold: 500.0           # milliseconds
+      comparator: gt             # gt, gte, lt, lte, eq
+      severity: WARNING          # INFO, WARNING, CRITICAL
+      cooldown: 5m               # Minimum time between alerts
+      enabled: true
+
+    - name: critical_latency_p99
+      description: "P99 latency exceeds 1 second"
+      type: latency
+      threshold: 1000.0
+      comparator: gt
+      severity: CRITICAL
+      cooldown: 5m
+      enabled: true
+
+    # Cache Performance Alerts
+    - name: low_cache_hit_ratio
+      description: "Cache hit ratio below 60%"
+      type: cache_hit_ratio
+      threshold: 0.60
+      comparator: lt
+      severity: WARNING
+      cooldown: 10m
+      enabled: true
+
+    - name: critical_cache_hit_ratio
+      description: "Cache hit ratio critically low (below 40%)"
+      type: cache_hit_ratio
+      threshold: 0.40
+      comparator: lt
+      severity: CRITICAL
+      cooldown: 10m
+      enabled: true
+
+    - name: high_cache_memory
+      description: "Cache memory usage exceeds 500MB"
+      type: cache_memory
+      threshold: 500.0           # MB
+      comparator: gt
+      severity: WARNING
+      cooldown: 15m
+      enabled: true
+
+    - name: critical_cache_memory
+      description: "Cache memory usage critically high (>1GB)"
+      type: cache_memory
+      threshold: 1024.0
+      comparator: gt
+      severity: CRITICAL
+      cooldown: 15m
+      enabled: true
+
+    # Error Rate Alerts
+    - name: high_error_rate
+      description: "Error rate exceeds 5%"
+      type: error_rate
+      threshold: 0.05
+      comparator: gt
+      severity: CRITICAL
+      cooldown: 5m
+      enabled: true
+
+    - name: moderate_error_rate
+      description: "Error rate exceeds 2%"
+      type: error_rate
+      threshold: 0.02
+      comparator: gt
+      severity: WARNING
+      cooldown: 10m
+      enabled: true
+
+    # Throughput Alerts
+    - name: low_throughput
+      description: "Throughput below expected 10 req/s"
+      type: throughput
+      threshold: 10.0
+      comparator: lt
+      severity: WARNING
+      cooldown: 10m
+      enabled: false             # Disabled by default
+
+    - name: very_low_throughput
+      description: "Throughput critically low (below 5 req/s)"
+      type: throughput
+      threshold: 5.0
+      comparator: lt
+      severity: CRITICAL
+      cooldown: 5m
+      enabled: false
+
+  # Alert Notification Settings (for future webhook/email integration)
+  notifications:
+    enabled: false
+    webhook_url: ""
+    email_recipients: []
+    slack_webhook: ""
+
+# Prometheus Exporter Settings
+prometheus:
+  enabled: true
+  port: 9090                   # Prometheus metrics port
+  path: /metrics               # Metrics endpoint path
+  scrape_interval: 15s         # Recommended scrape interval
+
+# Output and Storage Settings
+output:
+  directory: "./monitoring"    # Directory for monitoring reports
+  format: json                 # Report format: json, yaml
+  auto_save: true              # Automatically save reports
+  save_interval: 1h            # How often to save reports
+
+# Performance Targets
+targets:
+  cache_hit_ratio_min: 0.70    # Minimum acceptable cache hit ratio
+  latency_p95_max: 300.0       # Maximum acceptable P95 latency (ms)
+  latency_p99_max: 500.0       # Maximum acceptable P99 latency (ms)
+  error_rate_max: 0.01         # Maximum acceptable error rate (1%)
+  throughput_min: 50.0         # Minimum acceptable throughput (req/s)
+
+# Advanced Settings
+advanced:
+  # Memory Management
+  memory_limit_mb: 2048        # Maximum memory for monitoring system
+  snapshot_compression: false  # Compress snapshots to save memory
+
+  # Performance
+  metrics_buffer_size: 10000   # Buffer size for metrics collection
+  concurrent_collectors: 4     # Number of concurrent metric collectors
+
+  # Debugging
+  debug_mode: false            # Enable debug logging
+  profile_enabled: false       # Enable CPU/memory profiling
+  trace_enabled: false         # Enable distributed tracing
+
+# Integration Settings
+integrations:
+  # Grafana Dashboard
+  grafana:
+    enabled: false
+    url: ""
+    api_key: ""
+
+  # External Monitoring Services
+  external:
+    datadog:
+      enabled: false
+      api_key: ""
+    newrelic:
+      enabled: false
+      license_key: ""
+    honeycomb:
+      enabled: false
+      api_key: ""
+
+# Custom Metrics (for extension)
+custom_metrics:
+  enabled: false
+  definitions: []
+
+---
+# Example: Minimal Monitoring Configuration
+# Uncomment and use this for basic monitoring
+
+# name: "basic_monitoring"
+# description: "Minimal monitoring configuration"
+#
+# dashboard:
+#   enabled: true
+#   port: 8080
+#
+# alerting:
+#   enabled: true
+#   rules:
+#     - name: high_latency
+#       type: latency
+#       threshold: 500.0
+#       comparator: gt
+#       severity: WARNING
+#       enabled: true
+#
+# prometheus:
+#   enabled: true
+#   port: 9090
+
+---
+# Example: Development Monitoring Configuration
+# Uncomment for development environment
+
+# name: "dev_monitoring"
+# description: "Development environment monitoring"
+#
+# metrics:
+#   collection_interval: 10s
+#   snapshot_interval: 60s
+#
+# dashboard:
+#   enabled: true
+#   port: 8080
+#   refresh_interval: 5s
+#
+# alerting:
+#   enabled: false           # Disable alerts in development
+#
+# prometheus:
+#   enabled: false           # Disable Prometheus in development
+#
+# advanced:
+#   debug_mode: true         # Enable debug mode

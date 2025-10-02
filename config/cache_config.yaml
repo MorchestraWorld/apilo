@@ -1,0 +1,163 @@
+# API Latency Optimizer - Cache Configuration Example
+
+name: "cached_api_benchmark"
+description: "Benchmark with response caching enabled to optimize latency"
+output_dir: "./benchmarks/cache_results"
+
+# Benchmark runs with caching enabled
+runs:
+  - name: "baseline_no_cache"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      # No cache configuration - baseline measurement
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "with_default_cache"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      cache:
+        enabled: true
+        capacity: 10000
+        max_memory_mb: 100
+        cleanup_interval: "5m"
+        metrics_interval: "30s"
+        policy:
+          type: "default"
+          base_ttl: "5m"
+          min_ttl: "30s"
+          max_ttl: "30m"
+          max_cache_size_mb: 10
+        warmup:
+          enabled: false
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "with_adaptive_cache"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 1000
+      concurrency: 50
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      cache:
+        enabled: true
+        capacity: 10000
+        max_memory_mb: 200
+        cleanup_interval: "5m"
+        metrics_interval: "30s"
+        policy:
+          type: "adaptive"
+          base_ttl: "5m"
+          min_ttl: "1m"
+          max_ttl: "1h"
+          max_cache_size_mb: 10
+        warmup:
+          enabled: true
+          strategy: "adaptive"
+          interval: "15m"
+          static_urls:
+            - "https://api.anthropic.com"
+          prediction_window: "30m"
+          top_n: 10
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "with_static_warmup"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      cache:
+        enabled: true
+        capacity: 5000
+        max_memory_mb: 50
+        cleanup_interval: "10m"
+        metrics_interval: "1m"
+        policy:
+          type: "default"
+          base_ttl: "10m"
+          min_ttl: "1m"
+          max_ttl: "30m"
+          max_cache_size_mb: 5
+        warmup:
+          enabled: true
+          strategy: "static"
+          interval: "10m"
+          static_urls:
+            - "https://api.anthropic.com"
+            - "https://api.anthropic.com/v1/messages"
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
+
+  - name: "high_capacity_cache"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 2000
+      concurrency: 100
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      cache:
+        enabled: true
+        capacity: 50000
+        max_memory_mb: 500
+        cleanup_interval: "5m"
+        metrics_interval: "30s"
+        policy:
+          type: "lfu"  # Least Frequently Used
+          base_ttl: "15m"
+          min_ttl: "2m"
+          max_ttl: "2h"
+          max_cache_size_mb: 20
+          min_access_count: 5
+        warmup:
+          enabled: true
+          strategy: "predictive"
+          interval: "10m"
+          prediction_window: "1h"
+          top_n: 20
+    iterations: 3
+    warmup_iterations: 2
+    load_pattern: "ramp_up"
+
+  - name: "ttl_policy_cache"
+    config:
+      target_url: "https://api.anthropic.com"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true
+      method: "GET"
+      cache:
+        enabled: true
+        capacity: 10000
+        max_memory_mb: 100
+        cleanup_interval: "2m"
+        metrics_interval: "30s"
+        policy:
+          type: "ttl"  # Fixed TTL for all entries
+          base_ttl: "3m"
+        warmup:
+          enabled: false
+    iterations: 3
+    warmup_iterations: 1
+    load_pattern: "constant"
