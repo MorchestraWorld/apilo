@@ -58,6 +58,16 @@ func main() {
 }
 ```
 
+### Claude Code Integration (Recommended)
+
+**Quick Start in Claude Code:**
+
+```
+/api-optimize https://api.example.com
+```
+
+The optimizer is available as a slash command in Claude Code for instant benchmarking and optimization. See [QUICKSTART_CLAUDE_CODE.md](QUICKSTART_CLAUDE_CODE.md) for full guide.
+
 ---
 
 ## ✨ Key Features
@@ -112,6 +122,8 @@ func main() {
 
 ### Getting Started
 - **[Quick Start Guide](QUICK_START.md)** - Get running in 5 minutes
+- **[Claude Code Quick Start](QUICKSTART_CLAUDE_CODE.md)** - ⚡ Use in Claude Code (recommended)
+- **[Claude Code Integration Guide](CLAUDE_CODE_INTEGRATION.md)** - Complete Claude Code integration
 - **[Installation Guide](docs/INSTALLATION.md)** - Detailed setup instructions
 - **[Architecture Overview](docs/ARCHITECTURE.md)** - System design and components
 
