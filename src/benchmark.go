@@ -11,6 +11,7 @@ import (
 	"net/http/httptrace"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -18,58 +19,58 @@ import (
 // LatencyMetrics captures detailed timing information for a single request
 type LatencyMetrics struct {
 	// Connection timing
-	DNSLookup         time.Duration `json:"dns_lookup"`
-	TCPConnection     time.Duration `json:"tcp_connection"`
-	TLSHandshake      time.Duration `json:"tls_handshake"`
-	ServerProcessing  time.Duration `json:"server_processing"`
-	ContentTransfer   time.Duration `json:"content_transfer"`
+	DNSLookup        time.Duration `json:"dns_lookup"`
+	TCPConnection    time.Duration `json:"tcp_connection"`
+	TLSHandshake     time.Duration `json:"tls_handshake"`
+	ServerProcessing time.Duration `json:"server_processing"`
+	ContentTransfer  time.Duration `json:"content_transfer"`
 
 	// Total times
-	TotalLatency      time.Duration `json:"total_latency"`
-	TimeToFirstByte   time.Duration `json:"time_to_first_byte"`
+	TotalLatency    time.Duration `json:"total_latency"`
+	TimeToFirstByte time.Duration `json:"time_to_first_byte"`
 
 	// Response metadata
-	StatusCode        int           `json:"status_code"`
-	ResponseSize      int64         `json:"response_size_bytes"`
-	Timestamp         time.Time     `json:"timestamp"`
+	StatusCode   int       `json:"status_code"`
+	ResponseSize int64     `json:"response_size_bytes"`
+	Timestamp    time.Time `json:"timestamp"`
 
 	// Error tracking
-	Error             string        `json:"error,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
 // BenchmarkResult contains aggregated statistics from multiple requests
 type BenchmarkResult struct {
 	// Test configuration
-	TargetURL         string        `json:"target_url"`
-	TotalRequests     int           `json:"total_requests"`
-	Concurrency       int           `json:"concurrency"`
-	Duration          time.Duration `json:"duration"`
-	StartTime         time.Time     `json:"start_time"`
-	EndTime           time.Time     `json:"end_time"`
+	TargetURL     string        `json:"target_url"`
+	TotalRequests int           `json:"total_requests"`
+	Concurrency   int           `json:"concurrency"`
+	Duration      time.Duration `json:"duration"`
+	StartTime     time.Time     `json:"start_time"`
+	EndTime       time.Time     `json:"end_time"`
 
 	// Success/failure tracking
-	SuccessfulReqs    int           `json:"successful_requests"`
-	FailedReqs        int           `json:"failed_requests"`
+	SuccessfulReqs int `json:"successful_requests"`
+	FailedReqs     int `json:"failed_requests"`
 
 	// Throughput metrics
-	RequestsPerSecond float64       `json:"requests_per_second"`
-	BytesPerSecond    float64       `json:"bytes_per_second"`
+	RequestsPerSecond float64 `json:"requests_per_second"`
+	BytesPerSecond    float64 `json:"bytes_per_second"`
 
 	// Latency statistics (all in milliseconds for readability)
-	Latency           LatencyStats  `json:"latency"`           // Alias for LatencyStats
-	LatencyStats      LatencyStats  `json:"latency_stats"`
-	TTFBStats         LatencyStats  `json:"ttfb_stats"`
-	ConnectionStats   LatencyStats  `json:"connection_stats"`
-	TLSStats          LatencyStats  `json:"tls_stats"`
+	Latency         LatencyStats `json:"latency"` // Alias for LatencyStats
+	LatencyStats    LatencyStats `json:"latency_stats"`
+	TTFBStats       LatencyStats `json:"ttfb_stats"`
+	ConnectionStats LatencyStats `json:"connection_stats"`
+	TLSStats        LatencyStats `json:"tls_stats"`
 
 	// Throughput alias
-	Throughput        ThroughputStats `json:"throughput"`
+	Throughput ThroughputStats `json:"throughput"`
 
 	// Success rate
-	SuccessRate       float64 `json:"success_rate"`
+	SuccessRate float64 `json:"success_rate"`
 
 	// Raw data for detailed analysis
-	RawMetrics        []LatencyMetrics `json:"raw_metrics,omitempty"`
+	RawMetrics []LatencyMetrics `json:"raw_metrics,omitempty"`
 }
 
 // LatencyStats provides statistical analysis for a timing metric
@@ -124,6 +125,9 @@ func NewBenchmarker(config BenchmarkConfig) *Benchmarker {
 		config.TotalRequests = 100
 	}
 
+	// Normalize URL: add https:// if no scheme is provided
+	config.TargetURL = normalizeURL(config.TargetURL)
+
 	// Create optimized HTTP client
 	transport := &http.Transport{
 		MaxIdleConns:        config.Concurrency,
@@ -145,6 +149,19 @@ func NewBenchmarker(config BenchmarkConfig) *Benchmarker {
 		client:  client,
 		metrics: make([]LatencyMetrics, 0, config.TotalRequests),
 	}
+}
+
+// normalizeURL ensures the URL has a valid scheme (http:// or https://)
+func normalizeURL(url string) string {
+	url = strings.TrimSpace(url)
+
+	// Check if URL already has a scheme
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+		return url
+	}
+
+	// Add https:// as the default scheme
+	return "https://" + url
 }
 
 // Run executes the benchmark and returns aggregated results
