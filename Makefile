@@ -1,10 +1,11 @@
-.PHONY: help build install clean test run dev lint fmt deps
+.PHONY: help build install clean test run
 
 # Variables
-BINARY_NAME=apilo
-VERSION=2.0.0
+BINARY_NAME=api-optimizer
+VERSION=1.0.0
 BUILD_DIR=bin
 INSTALL_PATH=$(HOME)/go/bin
+SRC_DIR=./src
 
 # Get build information
 BUILD_TIME=$(shell date -u '+%Y-%m-%d %H:%M:%S UTC')
@@ -13,10 +14,10 @@ SOURCE_DIR=$(shell pwd)
 
 # Build flags with injected variables
 LDFLAGS=-ldflags="-w -s \
-	-X 'apilo/internal/build.Version=$(VERSION)' \
-	-X 'apilo/internal/build.BuildTime=$(BUILD_TIME)' \
-	-X 'apilo/internal/build.Commit=$(GIT_COMMIT)' \
-	-X 'apilo/internal/build.SourceDir=$(SOURCE_DIR)'"
+	-X 'main.Version=$(VERSION)' \
+	-X 'main.BuildTime=$(BUILD_TIME)' \
+	-X 'main.Commit=$(GIT_COMMIT)' \
+	-X 'main.SourceDir=$(SOURCE_DIR)'"
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -24,33 +25,34 @@ help: ## Show this help message
 	@echo 'Available targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-build: ## Build the CLI binary
-	@echo "🔨 Building $(BINARY_NAME)..."
+build: ## Build the api-optimizer binary
+	@echo "🔨 Building $(BINARY_NAME) with embedded source path..."
 	@mkdir -p $(BUILD_DIR)
-	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) .
+	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) $(SRC_DIR)
 	@echo "✅ Build complete: $(BUILD_DIR)/$(BINARY_NAME)"
+	@echo "📁 Source path embedded: $(SOURCE_DIR)"
 
 install: build ## Build and install globally
 	@echo "📦 Installing $(BINARY_NAME) to $(INSTALL_PATH)..."
-	@go install $(LDFLAGS)
+	@cp $(BUILD_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
+	@chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
 	@echo "✅ Installation complete!"
 	@echo ""
-	@echo "Run 'apilo --help' to get started"
+	@echo "Run '$(BINARY_NAME) --help' to get started"
 
 clean: ## Clean build artifacts
 	@echo "🧹 Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
-	@go clean
 	@echo "✅ Clean complete"
 
 test: ## Run tests
 	@echo "🧪 Running tests..."
-	@go test -v ./...
+	@go test -v $(SRC_DIR)/...
 	@echo "✅ Tests complete"
 
 test-coverage: ## Run tests with coverage
 	@echo "🧪 Running tests with coverage..."
-	@go test -v -cover -coverprofile=coverage.out ./...
+	@go test -v -cover -coverprofile=coverage.out $(SRC_DIR)/...
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "✅ Coverage report: coverage.html"
 
@@ -58,17 +60,9 @@ run: build ## Build and run locally
 	@echo "🚀 Running $(BINARY_NAME)..."
 	@./$(BUILD_DIR)/$(BINARY_NAME)
 
-dev: ## Run in development mode (no build)
-	@echo "🚀 Running in dev mode..."
-	@go run main.go
-
-lint: ## Run linter
-	@echo "🔍 Running linter..."
-	@golangci-lint run || echo "⚠️  golangci-lint not installed. Run: brew install golangci-lint"
-
 fmt: ## Format code
 	@echo "🎨 Formatting code..."
-	@go fmt ./...
+	@go fmt $(SRC_DIR)/...
 	@echo "✅ Format complete"
 
 deps: ## Download dependencies
@@ -76,21 +70,6 @@ deps: ## Download dependencies
 	@go mod download
 	@go mod tidy
 	@echo "✅ Dependencies updated"
-
-verify: lint test ## Verify code quality and tests
-	@echo "✅ Verification complete"
-
-release: clean verify build ## Build release version
-	@echo "📦 Creating release v$(VERSION)..."
-	@mkdir -p release
-	@cp $(BUILD_DIR)/$(BINARY_NAME) release/$(BINARY_NAME)-v$(VERSION)
-	@tar -czf release/$(BINARY_NAME)-v$(VERSION).tar.gz -C $(BUILD_DIR) $(BINARY_NAME)
-	@echo "✅ Release created: release/$(BINARY_NAME)-v$(VERSION).tar.gz"
-
-docker-build: ## Build Docker image
-	@echo "🐳 Building Docker image..."
-	@docker build -t $(BINARY_NAME):$(VERSION) .
-	@echo "✅ Docker image built: $(BINARY_NAME):$(VERSION)"
 
 all: clean deps build test install ## Clean, deps, build, test, and install
 	@echo "✅ All tasks complete!"
