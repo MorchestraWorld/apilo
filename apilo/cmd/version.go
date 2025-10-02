@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"apilo/internal/build"
 	"fmt"
 	"runtime"
 
@@ -22,6 +23,13 @@ func init() {
 }
 
 func showVersion() {
+	// Get build info
+	buildInfo, err := build.GetBuildInfo()
+	if err != nil {
+		fmt.Printf("❌ Error getting build information: %v\n", err)
+		return
+	}
+
 	// Header
 	color.Cyan("\n╔═══════════════════════════════════════════════════════════════════╗")
 	color.Cyan("║                      Version Information                          ║")
@@ -29,8 +37,9 @@ func showVersion() {
 
 	// Version Info
 	fmt.Println(color.YellowString("📦 API Latency Optimizer (apilo)"))
-	fmt.Printf("   Version:     %s\n", color.CyanString(Version))
-	fmt.Printf("   Build Date:  %s\n", color.CyanString(BuildDate))
+	fmt.Printf("   Version:     %s\n", color.CyanString(buildInfo.Version))
+	fmt.Printf("   Build Date:  %s\n", color.CyanString(buildInfo.BuildTime))
+	fmt.Printf("   Commit:      %s\n", color.CyanString(buildInfo.Commit))
 	fmt.Printf("   Go Version:  %s\n", color.CyanString(runtime.Version()))
 	fmt.Printf("   Platform:    %s/%s\n\n", color.CyanString(runtime.GOOS), color.CyanString(runtime.GOARCH))
 
