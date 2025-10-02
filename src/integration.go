@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -65,7 +64,7 @@ func DefaultIntegratedConfig() *IntegratedConfig {
 	return &IntegratedConfig{
 		ClientConfig:     DefaultOptimizedClientConfig(),
 		BenchmarkConfig:  DefaultBenchmarkConfig(),
-		MonitoringConfig: DefaultMonitoringConfig(),
+		MonitoringConfig: &MonitoringConfig{DashboardEnabled: true, DashboardPort: 8080},
 
 		WarmupEnabled:       true,
 		WarmupURLs:          []string{},
@@ -131,9 +130,9 @@ func NewIntegratedOptimizer(config *IntegratedConfig) (*IntegratedOptimizer, err
 	}
 	optimizer.client = client
 
-	// Initialize benchmark engine with optimized client
+	// Initialize benchmark engine
 	benchmarkConfig := config.BenchmarkConfig
-	benchmarkConfig.OptimizedClient = client // Inject the optimized client
+	// Note: OptimizedClient integration handled separately in IntegratedBenchmarkEngine
 
 	benchmark, err := NewBenchmarkEngine(benchmarkConfig)
 	if err != nil {

@@ -178,7 +178,7 @@ func NewOptimizedClient(config *OptimizedClientConfig) (*OptimizedClient, error)
 			return nil, fmt.Errorf("failed to create monitor: %w", err)
 		}
 
-		client.metricsCollector = NewMetricsCollector()
+		client.metricsCollector = NewMetricsCollector(1000) // Default max snapshots
 	}
 
 	client.initialized = true
@@ -313,14 +313,15 @@ func (c *OptimizedClient) Do(req *OptimizedRequest) (*OptimizedResponse, error) 
 }
 
 // HTTP2RequestTiming contains detailed timing information for HTTP/2 requests
-type HTTP2RequestTiming struct {
-	DNSLatency        time.Duration
-	ConnectLatency    time.Duration
-	TLSLatency        time.Duration
-	TTFBLatency       time.Duration
-	ProcessingLatency time.Duration
-	ConnectionReused  bool
-}
+// MOVED TO types.go
+// type HTTP2RequestTiming struct {
+// 	DNSLatency        time.Duration
+// 	ConnectLatency    time.Duration
+// 	TLSLatency        time.Duration
+// 	TTFBLatency       time.Duration
+// 	ProcessingLatency time.Duration
+// 	ConnectionReused  bool
+// }
 
 // executeHTTP2Request performs the actual HTTP/2 request with detailed timing
 func (c *OptimizedClient) executeHTTP2Request(req *OptimizedRequest) (*http.Response, *HTTP2RequestTiming, error) {

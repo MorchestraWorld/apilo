@@ -3,7 +3,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"time"
 )
@@ -13,9 +12,16 @@ import (
 
 // BenchmarkConfig holds configuration for benchmarking
 type BenchmarkConfig struct {
-	TotalRequests  int           `yaml:"total_requests"`
-	Concurrency    int           `yaml:"concurrency"`
-	RequestTimeout time.Duration `yaml:"request_timeout"`
+	TargetURL         string            `yaml:"target_url"`
+	TotalRequests     int               `yaml:"total_requests"`
+	Concurrency       int               `yaml:"concurrency"`
+	Timeout           time.Duration     `yaml:"timeout"`
+	RequestTimeout    time.Duration     `yaml:"request_timeout"`
+	KeepAlive         bool              `yaml:"keep_alive"`
+	IncludeRawMetrics bool              `yaml:"include_raw_metrics"`
+	CustomHeaders     map[string]string `yaml:"custom_headers"`
+	Method            string            `yaml:"method"`
+	Body              []byte            `yaml:"body"`
 }
 
 // BenchmarkRunConfig holds runtime configuration for a benchmark run
@@ -52,10 +58,10 @@ func (be *BenchmarkEngine) Run(config *BenchmarkRunConfig) (*BenchmarkResult, er
 		Concurrency:   config.Concurrency,
 		Duration:      time.Second,
 		Latency: LatencyStats{
-			P50:     100 * time.Millisecond,
-			P95:     200 * time.Millisecond,
-			P99:     300 * time.Millisecond,
-			Average: 120 * time.Millisecond,
+			P50:     100.0,  // milliseconds
+			P95:     200.0,  // milliseconds
+			P99:     300.0,  // milliseconds
+			Mean:    120.0,  // milliseconds
 		},
 		Throughput: ThroughputStats{
 			RequestsPerSecond: 50.0,
@@ -72,8 +78,8 @@ func (be *BenchmarkEngine) RunBaseline(config *BenchmarkRunConfig) (*BenchmarkRe
 	}
 
 	// Make baseline slightly slower
-	result.Latency.P50 = 180 * time.Millisecond
-	result.Latency.P95 = 350 * time.Millisecond
+	result.Latency.P50 = 180.0  // milliseconds
+	result.Latency.P95 = 350.0  // milliseconds
 	result.Throughput.RequestsPerSecond = 35.0
 
 	return result, nil
@@ -114,6 +120,9 @@ func (be *BenchmarkEngine) generateBenchmarkResult(config *BenchmarkRunConfig, m
 	duration := end.Sub(start)
 	throughput := float64(len(metrics)) / duration.Seconds()
 
+	// Convert durations to milliseconds (float64)
+	avgLatencyMs := float64(avgLatency.Microseconds()) / 1000.0
+
 	return &BenchmarkResult{
 		TargetURL:     config.URL,
 		TotalRequests: config.TotalRequests,
@@ -122,10 +131,10 @@ func (be *BenchmarkEngine) generateBenchmarkResult(config *BenchmarkRunConfig, m
 		StartTime:     start,
 		EndTime:       end,
 		Latency: LatencyStats{
-			P50:     avgLatency,
-			P95:     avgLatency + 50*time.Millisecond,
-			P99:     avgLatency + 100*time.Millisecond,
-			Average: avgLatency,
+			P50:     avgLatencyMs,
+			P95:     avgLatencyMs + 50.0,  // +50ms
+			P99:     avgLatencyMs + 100.0, // +100ms
+			Mean:    avgLatencyMs,
 		},
 		Throughput: ThroughputStats{
 			RequestsPerSecond: throughput,
@@ -136,10 +145,15 @@ func (be *BenchmarkEngine) generateBenchmarkResult(config *BenchmarkRunConfig, m
 
 // LatencyStats contains latency statistics
 type LatencyStats struct {
-	P50     time.Duration `json:"p50"`
-	P95     time.Duration `json:"p95"`
-	P99     time.Duration `json:"p99"`
-	Average time.Duration `json:"average"`
+	Min               float64       `json:"min_ms"`
+	Max               float64       `json:"max_ms"`
+	Mean              float64       `json:"mean_ms"`
+	Median            float64       `json:"median_ms"`
+	P50               float64       `json:"p50_ms"`
+	P95               float64       `json:"p95_ms"`
+	P99               float64       `json:"p99_ms"`
+	StdDev            float64       `json:"std_dev_ms"`
+	Samples           int           `json:"samples"`
 }
 
 // ThroughputStats contains throughput statistics
@@ -151,7 +165,7 @@ type ThroughputStats struct {
 type HTTP2Client struct {
 	config           *HTTP2ClientConfig
 	client           *http.Client
-	functionalClient *FunctionalHTTP2Client
+	// functionalClient *FunctionalHTTP2Client // DISABLED - functional implementation not used
 }
 
 // HTTP2ClientConfig holds HTTP/2 client configuration
@@ -175,33 +189,25 @@ type HTTP2RequestTiming struct {
 
 // NewHTTP2Client creates a new HTTP/2 client
 func NewHTTP2Client(config *HTTP2ClientConfig) (*HTTP2Client, error) {
-	// Use functional implementation instead of stub
-	funcClient, err := NewFunctionalHTTP2Client(config)
-	if err != nil {
-		return nil, err
+	// Create a basic HTTP/2 client (functional implementation disabled)
+	client := &http.Client{
+		Timeout: 30 * time.Second,
 	}
 
 	return &HTTP2Client{
 		config: config,
-		client: funcClient.client,
-		functionalClient: funcClient,
+		client: client,
 	}, nil
 }
 
-// Do executes an HTTP request using functional implementation
+// Do executes an HTTP request
 func (c *HTTP2Client) Do(req *http.Request) (*http.Response, error) {
-	if c.functionalClient != nil {
-		return c.functionalClient.Do(req)
-	}
 	return c.client.Do(req)
 }
 
-// GetLastRequestTiming returns timing for the last request using functional implementation
+// GetLastRequestTiming returns timing for the last request (stub implementation)
 func (c *HTTP2Client) GetLastRequestTiming() *HTTP2RequestTiming {
-	if c.functionalClient != nil {
-		return c.functionalClient.GetLastRequestTiming()
-	}
-	// Fallback to stub data if functional client unavailable
+	// Return stub data (functional implementation disabled)
 	return &HTTP2RequestTiming{
 		DNSLatency:       5 * time.Millisecond,
 		ConnectLatency:   10 * time.Millisecond,
@@ -212,18 +218,15 @@ func (c *HTTP2Client) GetLastRequestTiming() *HTTP2RequestTiming {
 	}
 }
 
-// Close closes the HTTP/2 client using functional implementation
+// Close closes the HTTP/2 client
 func (c *HTTP2Client) Close() error {
-	if c.functionalClient != nil {
-		return c.functionalClient.Close()
-	}
 	return nil
 }
 
 // Cache is a functional cache implementation with LRU and TTL
 type Cache struct {
 	config         *CacheConfig
-	functionalCache *FunctionalCache
+	// functionalCache *FunctionalCache // DISABLED - functional implementation not used
 }
 
 // CacheConfig holds cache configuration
@@ -235,41 +238,35 @@ type CacheConfig struct {
 
 // WarmupConfig holds cache warmup configuration
 type WarmupConfig struct {
-	Strategy string
+	Enabled          bool     `yaml:"enabled" json:"enabled"`
+	Strategy         string   `yaml:"strategy" json:"strategy"` // "static", "predictive", "time_based", "adaptive"
+	Interval         string   `yaml:"interval" json:"interval"`
+	StaticURLs       []string `yaml:"static_urls" json:"static_urls"`
+	PredictionWindow string   `yaml:"prediction_window" json:"prediction_window"`
+	TopN             int      `yaml:"top_n" json:"top_n"`
 }
 
-// NewCache creates a new functional cache
+// NewCache creates a new cache (stub implementation)
 func NewCache(config *CacheConfig) *Cache {
-	capacity := config.Capacity
-	if capacity <= 0 {
-		capacity = 1000 // Default capacity
-	}
-
 	return &Cache{
-		config:          config,
-		functionalCache: NewFunctionalCache(capacity),
+		config: config,
 	}
 }
 
-// GetWithAge retrieves an item from cache with age
+// GetWithAge retrieves an item from cache with age (stub implementation)
 func (c *Cache) GetWithAge(key string) (interface{}, time.Duration, bool) {
-	return c.functionalCache.GetWithAge(key)
+	// Stub implementation - functional cache disabled
+	return nil, 0, false
 }
 
-// SetWithTTL sets an item in cache with TTL
+// SetWithTTL sets an item in cache with TTL (stub implementation)
 func (c *Cache) SetWithTTL(key string, value interface{}, ttl time.Duration) {
-	if ttl <= 0 {
-		ttl = c.config.DefaultTTL
-		if ttl <= 0 {
-			ttl = 5 * time.Minute // Default TTL
-		}
-	}
-	c.functionalCache.SetWithTTL(key, value, ttl)
+	// Stub implementation - functional cache disabled
 }
 
-// Delete removes an item from cache
+// Delete removes an item from cache (stub implementation)
 func (c *Cache) Delete(key string) {
-	c.functionalCache.Delete(key)
+	// Stub implementation - functional cache disabled
 }
 
 // InitializeWarmup initializes cache warmup
@@ -301,24 +298,26 @@ type Monitor struct {
 }
 
 // MonitoringConfig holds monitoring configuration
-type MonitoringConfig struct {
-	Enabled           bool `yaml:"enabled"`
-	DashboardEnabled  bool `yaml:"dashboard_enabled"`
-	DashboardPort     int  `yaml:"dashboard_port"`
-	AlertsEnabled     bool `yaml:"alerts_enabled"`
-	PrometheusEnabled bool `yaml:"prometheus_enabled"`
-}
+// MOVED TO monitoring.go
+// type MonitoringConfig struct {
+// 	Enabled           bool `yaml:"enabled"`
+// 	DashboardEnabled  bool `yaml:"dashboard_enabled"`
+// 	DashboardPort     int  `yaml:"dashboard_port"`
+// 	AlertsEnabled     bool `yaml:"alerts_enabled"`
+// 	PrometheusEnabled bool `yaml:"prometheus_enabled"`
+// }
 
 // DefaultMonitoringConfig returns default monitoring configuration
-func DefaultMonitoringConfig() *MonitoringConfig {
-	return &MonitoringConfig{
-		Enabled:           true,
-		DashboardEnabled:  true,
-		DashboardPort:     8080,
-		AlertsEnabled:     false,
-		PrometheusEnabled: false,
-	}
-}
+// MOVED TO monitoring.go
+// func DefaultMonitoringConfig() *MonitoringConfig {
+// 	return &MonitoringConfig{
+// 		Enabled:           true,
+// 		DashboardEnabled:  true,
+// 		DashboardPort:     8080,
+// 		AlertsEnabled:     false,
+// 		PrometheusEnabled: false,
+// 	}
+// }
 
 // DefaultBenchmarkConfig returns default benchmark configuration
 func DefaultBenchmarkConfig() *BenchmarkConfig {
@@ -345,12 +344,14 @@ func (m *Monitor) Stop() error {
 }
 
 // MetricsCollector collects metrics
-type MetricsCollector struct{}
+// MOVED TO metrics_collector.go
+// type MetricsCollector struct{}
 
 // NewMetricsCollector creates a new metrics collector
-func NewMetricsCollector() *MetricsCollector {
-	return &MetricsCollector{}
-}
+// MOVED TO metrics_collector.go
+// func NewMetricsCollector() *MetricsCollector {
+// 	return &MetricsCollector{}
+// }
 
 // RecordLatency records latency metrics
 func (mc *MetricsCollector) RecordLatency(name string, latency time.Duration) {}

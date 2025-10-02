@@ -9,6 +9,9 @@ import (
 
 // MonitoringConfig defines monitoring system configuration
 type MonitoringConfig struct {
+	// General settings
+	Enabled            bool          // Master enable/disable switch
+
 	// Collection settings
 	MetricsInterval    time.Duration
 	SnapshotInterval   time.Duration
@@ -21,6 +24,7 @@ type MonitoringConfig struct {
 
 	// Alerting settings
 	AlertingEnabled    bool
+	AlertsEnabled      bool          // Alias for compatibility
 	AlertCheckInterval time.Duration
 	AlertRules         []AlertRule
 
@@ -389,6 +393,7 @@ func (ms *MonitoringSystem) PrintSummary() {
 // DefaultMonitoringConfig returns a default monitoring configuration
 func DefaultMonitoringConfig() MonitoringConfig {
 	return MonitoringConfig{
+		Enabled:            true,
 		MetricsInterval:    5 * time.Second,
 		SnapshotInterval:   30 * time.Second,
 		CleanupInterval:    5 * time.Minute,
@@ -396,6 +401,7 @@ func DefaultMonitoringConfig() MonitoringConfig {
 		DashboardPort:      8080,
 		DashboardRefresh:   2 * time.Second,
 		AlertingEnabled:    true,
+		AlertsEnabled:      true,
 		AlertCheckInterval: 10 * time.Second,
 		PrometheusEnabled:  true,
 		PrometheusPort:     9090,

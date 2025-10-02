@@ -3,9 +3,9 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -418,13 +418,13 @@ func (ibe *IntegratedBenchmarkEngine) evaluateTargets(result *IntegratedBenchmar
 	targets := &TargetAchievement{}
 
 	// Define target values (should be configurable)
-	latencyTarget := 100 * time.Millisecond
+	latencyTargetMs := 100.0 // milliseconds
 	cacheHitTarget := 0.6
 	connectionReuseTarget := 0.9
 	throughputTarget := 50.0 // requests per second
 
 	// Check latency target
-	targets.LatencyTarget = result.Latency.P50 <= latencyTarget
+	targets.LatencyTarget = result.Latency.P50 <= latencyTargetMs
 
 	// Check cache hit target
 	if result.OptimizationStats != nil {
@@ -519,7 +519,7 @@ func (ibe *IntegratedBenchmarkEngine) GenerateIntegratedReport(result *Integrate
 		result.Latency.P50,
 		result.Latency.P95,
 		result.Latency.P99,
-		result.Latency.Average,
+		result.Latency.Mean,
 		result.Throughput.RequestsPerSecond,
 		result.SuccessRate,
 	)
@@ -550,8 +550,8 @@ func (ibe *IntegratedBenchmarkEngine) GenerateIntegratedReport(result *Integrate
 
 `,
 			result.ComparisonResult.Improvement.LatencyImprovement*100,
-			float64(result.ComparisonResult.Baseline.Latency.P50.Nanoseconds())/1000000,
-			float64(result.ComparisonResult.Optimized.Latency.P50.Nanoseconds())/1000000,
+			result.ComparisonResult.Baseline.Latency.P50,
+			result.ComparisonResult.Optimized.Latency.P50,
 			result.ComparisonResult.Improvement.ThroughputImprovement*100,
 			result.ComparisonResult.Baseline.Throughput.RequestsPerSecond,
 			result.ComparisonResult.Optimized.Throughput.RequestsPerSecond,

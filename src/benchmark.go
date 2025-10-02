@@ -56,40 +56,49 @@ type BenchmarkResult struct {
 	BytesPerSecond    float64       `json:"bytes_per_second"`
 
 	// Latency statistics (all in milliseconds for readability)
+	Latency           LatencyStats  `json:"latency"`           // Alias for LatencyStats
 	LatencyStats      LatencyStats  `json:"latency_stats"`
 	TTFBStats         LatencyStats  `json:"ttfb_stats"`
 	ConnectionStats   LatencyStats  `json:"connection_stats"`
 	TLSStats          LatencyStats  `json:"tls_stats"`
+
+	// Throughput alias
+	Throughput        ThroughputStats `json:"throughput"`
+
+	// Success rate
+	SuccessRate       float64 `json:"success_rate"`
 
 	// Raw data for detailed analysis
 	RawMetrics        []LatencyMetrics `json:"raw_metrics,omitempty"`
 }
 
 // LatencyStats provides statistical analysis for a timing metric
-type LatencyStats struct {
-	Min               float64       `json:"min_ms"`
-	Max               float64       `json:"max_ms"`
-	Mean              float64       `json:"mean_ms"`
-	Median            float64       `json:"median_ms"`
-	P50               float64       `json:"p50_ms"`
-	P95               float64       `json:"p95_ms"`
-	P99               float64       `json:"p99_ms"`
-	StdDev            float64       `json:"std_dev_ms"`
-	Samples           int           `json:"samples"`
-}
+// MOVED TO types.go
+// type LatencyStats struct {
+// 	Min               float64       `json:"min_ms"`
+// 	Max               float64       `json:"max_ms"`
+// 	Mean              float64       `json:"mean_ms"`
+// 	Median            float64       `json:"median_ms"`
+// 	P50               float64       `json:"p50_ms"`
+// 	P95               float64       `json:"p95_ms"`
+// 	P99               float64       `json:"p99_ms"`
+// 	StdDev            float64       `json:"std_dev_ms"`
+// 	Samples           int           `json:"samples"`
+// }
 
 // BenchmarkConfig defines the parameters for a benchmark run
-type BenchmarkConfig struct {
-	TargetURL         string
-	TotalRequests     int
-	Concurrency       int
-	Timeout           time.Duration
-	KeepAlive         bool
-	IncludeRawMetrics bool
-	CustomHeaders     map[string]string
-	Method            string
-	Body              []byte
-}
+// MOVED TO types.go
+// type BenchmarkConfig struct {
+// 	TargetURL         string
+// 	TotalRequests     int
+// 	Concurrency       int
+// 	Timeout           time.Duration
+// 	KeepAlive         bool
+// 	IncludeRawMetrics bool
+// 	CustomHeaders     map[string]string
+// 	Method            string
+// 	Body              []byte
+// }
 
 // Benchmarker orchestrates the benchmarking process
 type Benchmarker struct {

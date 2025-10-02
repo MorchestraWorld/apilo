@@ -293,9 +293,9 @@ func (mbc *MemoryBoundedCache) updateMemoryPressure() {
 	}
 
 	mbc.memoryPressure = pressure
-	mbc.metrics.mu.Lock()
+	mbc.metrics.mutex.Lock()
 	mbc.metrics.memoryPressureValue = pressure
-	mbc.metrics.mu.Unlock()
+	mbc.metrics.mutex.Unlock()
 }
 
 // memoryManagementLoop runs background memory management tasks
@@ -313,7 +313,6 @@ func (mbc *MemoryBoundedCache) memoryManagementLoop() {
 func (mbc *MemoryBoundedCache) performMemoryCheck() {
 	mbc.mu.RLock()
 	currentMemory := mbc.currentMemory
-	maxMemory := mbc.maxMemoryBytes
 	pressure := mbc.memoryPressure
 	mbc.mu.RUnlock()
 
@@ -344,7 +343,7 @@ func (mbc *MemoryBoundedCache) performEmergencyCleanup() {
 	freedMemory := int64(0)
 
 	// First pass: Remove all expired items
-	for key, element := range mbc.items {
+	for _, element := range mbc.items {
 		if now.After(element.expiresAt) {
 			freedMemory += element.memorySize
 			mbc.removeElementUnsafe(element)
@@ -432,10 +431,10 @@ func (mbc *MemoryBoundedCache) triggerGC() {
 
 	// Update metrics
 	atomic.AddInt64(&mbc.metrics.gcRunCount, 1)
-	mbc.metrics.mu.Lock()
+	mbc.metrics.mutex.Lock()
 	mbc.metrics.gcDuration = duration
 	mbc.metrics.lastGCTime = time.Now()
-	mbc.metrics.mu.Unlock()
+	mbc.metrics.mutex.Unlock()
 	atomic.AddInt64(&mbc.metrics.memoryFreedBytes, freedBytes)
 
 	mbc.lastGCRun = time.Now()

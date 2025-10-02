@@ -476,14 +476,15 @@ func (w *CacheWarmer) ProcessPrefetchQueue(ctx context.Context, maxItems int) er
 }
 
 // WarmupConfig represents warmup configuration
-type WarmupConfig struct {
-	Enabled        bool          `yaml:"enabled" json:"enabled"`
-	Strategy       string        `yaml:"strategy" json:"strategy"` // "static", "predictive", "time_based", "adaptive"
-	Interval       string        `yaml:"interval" json:"interval"`
-	StaticURLs     []string      `yaml:"static_urls" json:"static_urls"`
-	PredictionWindow string      `yaml:"prediction_window" json:"prediction_window"`
-	TopN           int           `yaml:"top_n" json:"top_n"`
-}
+// MOVED TO types.go
+// type WarmupConfig struct {
+// 	Enabled        bool          `yaml:"enabled" json:"enabled"`
+// 	Strategy       string        `yaml:"strategy" json:"strategy"` // "static", "predictive", "time_based", "adaptive"
+// 	Interval       string        `yaml:"interval" json:"interval"`
+// 	StaticURLs     []string      `yaml:"static_urls" json:"static_urls"`
+// 	PredictionWindow string      `yaml:"prediction_window" json:"prediction_window"`
+// 	TopN           int           `yaml:"top_n" json:"top_n"`
+// }
 
 // CreateWarmupStrategy creates a warmup strategy from configuration
 func CreateWarmupStrategy(config WarmupConfig) (WarmupStrategy, error) {
