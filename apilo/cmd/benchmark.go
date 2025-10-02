@@ -16,12 +16,25 @@ var (
 )
 
 var benchmarkCmd = &cobra.Command{
-	Use:   "benchmark <url>",
+	Use:   "benchmark [url]",
 	Short: "Run performance benchmark",
-	Long:  "Execute performance benchmark against a URL using the API Latency Optimizer",
-	Args:  cobra.ExactArgs(1),
+	Long: `Execute performance benchmark against a URL using the API Latency Optimizer.
+
+Sample URLs to test:
+  • httpbin.org/get          - Free HTTP testing service
+  • api.anthropic.com        - Anthropic API endpoint
+  • aws.amazon.com           - AWS homepage
+  • google.com               - Google homepage
+  • api.github.com           - GitHub API
+
+If no URL is provided, defaults to httpbin.org/get`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		runBenchmark(args[0])
+		url := "httpbin.org/get"
+		if len(args) > 0 {
+			url = args[0]
+		}
+		runBenchmark(url)
 	},
 }
 
