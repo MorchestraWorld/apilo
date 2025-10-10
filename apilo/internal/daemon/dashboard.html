@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>apilo daemon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            line-height: 1.6;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            border-bottom: 2px solid #F97316;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #F97316;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #F97316;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .panel {
+            background: #000000;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2A2A2A;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            color: #FFFFFF;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .stat-value.highlight {
+            color: #F97316;
+        }
+
+        .metric-box {
+            background: #000000;
+            border: 1px solid #333;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-box .label {
+            color: #6B7280;
+            font-size: 11px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .metric-box .value {
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .metric-box .value.orange {
+            color: #F97316;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            color: #F97316;
+            font-size: 11px;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .table td {
+            color: #FFFFFF;
+            font-size: 12px;
+            padding: 8px;
+            border-bottom: 1px solid #2A2A2A;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table .grey {
+            color: #6B7280;
+        }
+
+        .info-box {
+            background: #000000;
+            border-left: 3px solid #F97316;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #6B7280;
+        }
+
+        .warning-box {
+            background: #2A1810;
+            border-left: 3px solid #F97316;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #F97316;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-dot.active {
+            background: #F97316;
+        }
+
+        .status-dot.inactive {
+            background: #6B7280;
+        }
+
+        .loading {
+            color: #6B7280;
+            text-align: center;
+            padding: 40px;
+            font-size: 12px;
+        }
+
+        .error {
+            color: #F97316;
+            background: #2A1810;
+            border: 1px solid #F97316;
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>▸ APILO DAEMON</h1>
+            <div class="subtitle">api latency optimizer v2.0 | real-time analytics dashboard</div>
+        </div>
+
+        <div id="content" class="loading">initializing...</div>
+    </div>
+
+    <script>
+        // Auto-refresh every 2 seconds
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+
+        async function updateDashboard() {
+            try {
+                const [status, metrics, cacheStats, analytics] = await Promise.all([
+                    fetchJSON('/status'),
+                    fetchJSON('/metrics'),
+                    fetchJSON('/cache/stats'),
+                    fetchJSON('/analytics?limit=100')
+                ]);
+
+                if (status && metrics && cacheStats) {
+                    renderDashboard(status, metrics, cacheStats, analytics);
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        ERROR: Failed to fetch dashboard data<br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchJSON(endpoint) {
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        }
+
+        function renderDashboard(status, metrics, cacheStats, analytics) {
+            const html = `
+                ${renderSystemStatus(status)}
+                ${renderQuickMetrics(metrics, cacheStats)}
+                ${analytics ? renderTokenMetrics(analytics.token_usage_metrics, analytics.token_savings) : ''}
+                ${analytics ? renderPerformanceMetrics(analytics) : ''}
+                ${analytics ? renderRecentActivity(analytics.recent_requests) : ''}
+            `;
+
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function renderSystemStatus(status) {
+            return `
+                <div class="section">
+                    <div class="section-title">[ SYSTEM STATUS ]</div>
+                    <div class="panel">
+                        <div class="stat-row">
+                            <span class="stat-label">${status.running ? '<span class="status-dot active"></span>' : '<span class="status-dot inactive"></span>'}daemon status</span>
+                            <span class="stat-value highlight">${status.running ? 'ACTIVE' : 'INACTIVE'}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">process id</span>
+                            <span class="stat-value">${status.pid}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">uptime</span>
+                            <span class="stat-value">${formatUptime(status.uptime)}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">port</span>
+                            <span class="stat-value">${status.port}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">memory usage</span>
+                            <span class="stat-value">${status.memory_usage_mb.toFixed(2)} MB</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuickMetrics(metrics, cache) {
+            return `
+                <div class="section">
+                    <div class="section-title">[ PERFORMANCE METRICS ]</div>
+                    <div class="grid-4">
+                        <div class="metric-box">
+                            <div class="label">total requests</div>
+                            <div class="value">${metrics.total_requests}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">cache hit ratio</div>
+                            <div class="value orange">${(metrics.cache_hit_ratio * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">avg latency</div>
+                            <div class="value">${formatDuration(metrics.avg_latency)}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">cache entries</div>
+                            <div class="value">${cache.entries}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTokenMetrics(usage, savings) {
+            if (!usage || usage.total_requests === 0) return '';
+
+            return `
+                <div class="section">
+                    <div class="section-title">[ TOKEN TRACKING ]</div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <div class="stat-row">
+                                <span class="stat-label">total tokens processed</span>
+                                <span class="stat-value highlight">${formatNumber(usage.total_tokens)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">input tokens</span>
+                                <span class="stat-value">${formatNumber(usage.total_input_tokens)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">output tokens</span>
+                                <span class="stat-value">${formatNumber(usage.total_output_tokens)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">avg per request</span>
+                                <span class="stat-value">${usage.avg_input_per_request.toFixed(0)} in / ${usage.avg_output_per_request.toFixed(0)} out</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">estimated cost</span>
+                                <span class="stat-value">$${usage.estimated_cost.toFixed(6)}</span>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="stat-row">
+                                <span class="stat-label">cache hits</span>
+                                <span class="stat-value highlight">${savings.total_cache_hits}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">tokens saved</span>
+                                <span class="stat-value">${formatNumber(savings.estimated_tokens_saved)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">cost saved</span>
+                                <span class="stat-value">$${savings.estimated_cost_savings.toFixed(6)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">api calls saved</span>
+                                <span class="stat-value">${savings.api_calls_saved}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">time saved</span>
+                                <span class="stat-value">${(savings.latency_savings_ms / 1000).toFixed(2)}s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        ▸ Savings based on measured token usage (avg: ${savings.avg_tokens_per_request} tokens/request) |
+                        Pricing: $3/MTok input, $15/MTok output (Claude Sonnet-4)
+                    </div>
+                    ${savings.total_cache_hits < 10 ? `
+                        <div class="warning-box">
+                            ⚠ Low sample size (${savings.total_cache_hits} cache hit${savings.total_cache_hits !== 1 ? 's' : ''}) |
+                            Estimates improve with 10+ cache hits
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderPerformanceMetrics(analytics) {
+            if (!analytics || !analytics.latency_percentiles) return '';
+
+            return `
+                <div class="section">
+                    <div class="section-title">[ LATENCY ANALYSIS ]</div>
+                    <div class="grid-3">
+                        <div class="metric-box">
+                            <div class="label">p50 (median)</div>
+                            <div class="value">${formatDuration(analytics.latency_percentiles.p50)}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">p95</div>
+                            <div class="value">${formatDuration(analytics.latency_percentiles.p95)}</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">p99</div>
+                            <div class="value orange">${formatDuration(analytics.latency_percentiles.p99)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRecentActivity(requests) {
+            if (!requests || requests.length === 0) return '';
+
+            const displayCount = Math.min(50, requests.length);
+            const rows = requests.slice(0, displayCount).map(req => {
+                const cacheStatus = req.cache_hit ? '[CACHE]' : '[MISS] ';
+                const urlShort = req.url.length > 60 ? req.url.substring(0, 60) + '...' : req.url;
+                const timestamp = new Date(req.timestamp);
+                const timeStr = timestamp.toLocaleTimeString();
+                const dateStr = timestamp.toLocaleDateString();
+                const tokenInfo = req.total_tokens > 0
+                    ? `${req.input_tokens}→${req.output_tokens}`
+                    : '-';
+
+                return `
+                    <tr>
+                        <td class="grey" title="${dateStr} ${timeStr}">${timeStr}</td>
+                        <td title="${req.url}">${urlShort}</td>
+                        <td>${req.method}</td>
+                        <td class="${req.cache_hit ? '' : 'grey'}">${cacheStatus}</td>
+                        <td>${req.status_code || '-'}</td>
+                        <td>${formatDuration(req.latency)}</td>
+                        <td title="Input→Output tokens">${tokenInfo}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            return `
+                <div class="section">
+                    <div class="section-title">[ RECENT REQUESTS ] (showing ${displayCount} of ${requests.length} total)</div>
+                    <div class="panel" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>TIME</th>
+                                    <th>URL</th>
+                                    <th>METHOD</th>
+                                    <th>CACHE</th>
+                                    <th>STATUS</th>
+                                    <th>LATENCY</th>
+                                    <th>TOKENS (I→O)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="info-box">
+                        ▸ Showing last ${displayCount} requests (max: 100) |
+                        Auto-refreshes every 2 seconds |
+                        Token format: input→output
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatNumber(num) {
+            if (num === 0) return '0';
+            if (num < 1000) return num.toString();
+            if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+            if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+            return (num / 1000000000).toFixed(1) + 'B';
+        }
+
+        function formatDuration(ns) {
+            if (ns === 0) return '0ms';
+            if (ns < 1000) return ns + 'ns';
+            if (ns < 1000000) return (ns / 1000).toFixed(0) + 'µs';
+            if (ns < 1000000000) return (ns / 1000000).toFixed(0) + 'ms';
+            return (ns / 1000000000).toFixed(2) + 's';
+        }
+
+        function formatUptime(ns) {
+            if (typeof ns === 'string') return ns;
+
+            if (ns === 0) return '0s';
+
+            const seconds = Math.floor(ns / 1000000000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                const h = hours % 24;
+                return `${days}d ${h}h`;
+            } else if (hours > 0) {
+                const m = minutes % 60;
+                return `${hours}h ${m}m`;
+            } else if (minutes > 0) {
+                const s = seconds % 60;
+                return `${minutes}m ${s}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+    </script>
+</body>
+</html>
