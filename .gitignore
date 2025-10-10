@@ -9,6 +9,9 @@ bin/
 *.dylib
 api-optimizer
 api-latency-optimizer
+examples/full-cache-demo
+examples/wikipedia-client
+src/src
 
 # Go build artifacts
 *.test
@@ -31,6 +34,7 @@ cover.html
 
 # Benchmarks and performance data
 benchmarks/results/
+apilo/benchmarks/results/
 benchmarks/baseline/*.json
 !benchmarks/baseline/.gitkeep
 *.bench
