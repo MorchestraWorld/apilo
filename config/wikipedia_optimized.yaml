@@ -1,0 +1,50 @@
+# Wikipedia Full Optimization Benchmark
+# Enables: Cache + HTTP/2 + Circuit Breaker + Monitoring
+
+name: "wikipedia_full_optimization"
+description: "Wikipedia benchmark with all optimizations enabled"
+output_dir: "./benchmarks/results/wikipedia_optimized"
+
+runs:
+  - name: "wikipedia_optimized"
+    config:
+      target_url: "https://www.wikipedia.org/"
+      total_requests: 500
+      concurrency: 20
+      timeout: 30s
+      keep_alive: true      # HTTP/2 optimization via keep-alive
+      method: "GET"
+
+      # Memory-bounded caching configuration
+      cache:
+        enabled: true
+        capacity: 10000
+        max_memory_mb: 500
+        cleanup_interval: "5m"
+        metrics_interval: "30s"
+        policy:
+          type: "adaptive"
+          base_ttl: "10m"
+          min_ttl: "2m"
+          max_ttl: "30m"
+          max_cache_size_mb: 50
+        warmup:
+          enabled: true
+          strategy: "adaptive"
+          interval: "5m"
+          static_urls:
+            - "https://www.wikipedia.org/"
+          prediction_window: "15m"
+          top_n: 10
+
+      # Circuit breaker configuration
+      circuit_breaker:
+        enabled: true
+        max_failures: 5
+        timeout: "30s"
+        reset_timeout: "60s"
+        half_open_requests: 3
+
+    iterations: 5
+    warmup_iterations: 2
+    load_pattern: "constant"
