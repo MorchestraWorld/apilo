@@ -1,6 +1,6 @@
 // Package src provides a functional HTTP/2 client implementation
 // This replaces the stub HTTP/2 client to enable actual HTTP/2 optimizations
-package main
+package extras
 
 import (
 	"context"
@@ -8,12 +8,30 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptrace"
-	"net/url"
 	"sync"
 	"time"
 
 	"golang.org/x/net/http2"
 )
+
+// HTTP2ClientConfig configures HTTP/2 client behavior
+type HTTP2ClientConfig struct {
+	MaxConnectionsPerHost int
+	IdleConnTimeout       time.Duration
+	TLSHandshakeTimeout   time.Duration
+	DisableCompression    bool
+	EnableHTTP2Push       bool
+}
+
+// HTTP2RequestTiming contains HTTP/2 request timing
+type HTTP2RequestTiming struct {
+	DNSLatency        time.Duration
+	ConnectLatency    time.Duration
+	TLSLatency        time.Duration
+	TTFBLatency       time.Duration
+	ProcessingLatency time.Duration
+	ConnectionReused  bool
+}
 
 // FunctionalHTTP2Client provides a working HTTP/2 client with real optimizations
 type FunctionalHTTP2Client struct {
@@ -52,7 +70,6 @@ func NewFunctionalHTTP2Client(config *HTTP2ClientConfig) (*FunctionalHTTP2Client
 		// Connection settings
 		DisableKeepAlives:     false,
 		DisableCompression:    config.DisableCompression,
-		MaxIdleConnsPerHost:   config.MaxConnectionsPerHost,
 		ResponseHeaderTimeout: 30 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 
@@ -138,16 +155,14 @@ func (c *FunctionalHTTP2Client) DoWithTiming(req *http.Request) (*http.Response,
 	req = req.WithContext(ctx)
 
 	// Execute request
-	startTime := time.Now()
 	resp, err := c.client.Do(req)
-	endTime := time.Now()
 
 	if err != nil {
 		return nil, timing, err
 	}
 
 	// Calculate processing latency (server processing time)
-	if !timing.TTFBLatency.IsZero() {
+	if timing.TTFBLatency > 0 {
 		timing.ProcessingLatency = timing.TTFBLatency - timing.ConnectLatency - timing.TLSLatency
 		if timing.ProcessingLatency < 0 {
 			timing.ProcessingLatency = 0

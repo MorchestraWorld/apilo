@@ -1,4 +1,4 @@
-package tests
+package main
 
 import (
 	"context"
@@ -6,16 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-
-	main "api-latency-optimizer/src"
-)
-
-// Type aliases for main package types
-type BenchmarkConfig = main.BenchmarkConfig
-
-var (
-	NewBenchmarker   = main.NewBenchmarker
-	calculateStats   = main.CalculateStats
 )
 
 // MockServer creates a test HTTP server with configurable latency
@@ -175,7 +165,7 @@ func TestStatisticalAccuracy(t *testing.T) {
 	// Test with known values
 	values := []float64{10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
 
-	stats := calculateStats(values)
+	stats := CalculateStats(values)
 
 	if stats.Min != 10 {
 		t.Errorf("Expected min=10, got %.2f", stats.Min)
@@ -237,7 +227,6 @@ func TestKeepAliveImpact(t *testing.T) {
 	}
 
 	// Keep-alive should generally result in better performance
-	// (though this is not guaranteed in all environments)
 	t.Logf("With keep-alive - P95: %.2f ms, RPS: %.2f",
 		resultWithKA.LatencyStats.P95, resultWithKA.RequestsPerSecond)
 	t.Logf("Without keep-alive - P95: %.2f ms, RPS: %.2f",

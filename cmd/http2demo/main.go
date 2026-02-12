@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"api-latency-optimizer/extras"
 )
 
 func main() {
 	// Test HTTP/2 client functionality
-	config := &HTTP2ClientConfig{
+	config := &extras.HTTP2ClientConfig{
 		MaxConnectionsPerHost: 10,
 		IdleConnTimeout:      90 * time.Second,
 		TLSHandshakeTimeout:  10 * time.Second,
@@ -17,15 +19,15 @@ func main() {
 		EnableHTTP2Push:      true,
 	}
 
-	client, err := NewFunctionalHTTP2Client(config)
+	client, err := extras.NewFunctionalHTTP2Client(config)
 	if err != nil {
-		fmt.Printf("❌ Failed to create HTTP/2 client: %v\n", err)
+		fmt.Printf("Failed to create HTTP/2 client: %v\n", err)
 		return
 	}
 	defer client.Close()
 
-	fmt.Println("🔧 Testing HTTP/2 Client Functional Implementation")
-	fmt.Println("=" + string(make([]rune, 50)))
+	fmt.Println("Testing HTTP/2 Client Functional Implementation")
+	fmt.Println("=================================================")
 
 	// Test URL (HTTP/2 enabled)
 	testURL := "https://httpbin.org/get"
@@ -33,35 +35,34 @@ func main() {
 	// Create request
 	req, err := http.NewRequest("GET", testURL, nil)
 	if err != nil {
-		fmt.Printf("❌ Failed to create request: %v\n", err)
+		fmt.Printf("Failed to create request: %v\n", err)
 		return
 	}
 
 	// Execute with timing
-	fmt.Printf("🚀 Testing HTTP/2 request to: %s\n", testURL)
+	fmt.Printf("Testing HTTP/2 request to: %s\n", testURL)
 
 	resp, timing, err := client.DoWithTiming(req)
 	if err != nil {
-		fmt.Printf("❌ Request failed: %v\n", err)
+		fmt.Printf("Request failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	// Check if HTTP/2 was used
 	isHTTP2 := client.IsHTTP2(resp)
-	protocolInfo := client.GetProtocolInfo(resp)
 
 	fmt.Printf(`
-📊 HTTP/2 Client Test Results
-=============================
+HTTP/2 Client Test Results
+===========================
 Status Code:       %d
 Protocol:          %s
 Is HTTP/2:         %t
 Protocol Major:    %d
 Protocol Minor:    %d
 
-🕐 Timing Breakdown
-===================
+Timing Breakdown
+=================
 DNS Latency:       %v
 Connect Latency:   %v
 TLS Latency:       %v
@@ -69,8 +70,8 @@ TTFB Latency:      %v
 Processing:        %v
 Connection Reused: %t
 
-🔧 Connection Stats
-===================
+Connection Stats
+=================
 `,
 		resp.StatusCode,
 		resp.Proto,
@@ -91,41 +92,33 @@ Connection Reused: %t
 		fmt.Printf("%-20s: %v\n", key, value)
 	}
 
-	fmt.Printf(`
-✅ HTTP/2 Test Results
-======================
-`)
+	fmt.Println()
 
 	if isHTTP2 {
-		fmt.Println("🎉 SUCCESS: HTTP/2 is working!")
-		fmt.Println("✅ Protocol version confirmed as HTTP/2")
-		fmt.Println("✅ Real timing measurements captured")
-		fmt.Println("✅ Connection configuration applied")
+		fmt.Println("SUCCESS: HTTP/2 is working!")
 	} else {
-		fmt.Println("⚠️  WARNING: HTTP/2 fallback occurred")
-		fmt.Printf("   Protocol used: %s\n", resp.Proto)
-		fmt.Println("   This might be expected for some servers")
+		fmt.Printf("WARNING: HTTP/2 fallback occurred (protocol: %s)\n", resp.Proto)
 	}
 
 	if timing.ConnectionReused {
-		fmt.Println("✅ Connection reuse working")
+		fmt.Println("Connection reuse working")
 	} else {
-		fmt.Println("ℹ️  New connection created (expected for first request)")
+		fmt.Println("New connection created (expected for first request)")
 	}
 
 	// Test second request to verify connection reuse
-	fmt.Println("\n🔄 Testing connection reuse with second request...")
+	fmt.Println("\nTesting connection reuse with second request...")
 
 	req2, _ := http.NewRequest("GET", testURL, nil)
 	resp2, timing2, err := client.DoWithTiming(req2)
 	if err == nil {
 		defer resp2.Body.Close()
 		if timing2.ConnectionReused {
-			fmt.Println("✅ Connection reuse successful on second request!")
+			fmt.Println("Connection reuse successful on second request!")
 		} else {
-			fmt.Println("⚠️  Connection not reused on second request")
+			fmt.Println("Connection not reused on second request")
 		}
 	}
 
-	fmt.Println("\n✅ HTTP/2 functional test completed!")
+	fmt.Println("\nHTTP/2 functional test completed!")
 }

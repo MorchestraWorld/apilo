@@ -1,6 +1,6 @@
 // Package src provides a functional LRU cache implementation
 // This replaces the stub cache implementations to enable actual caching
-package main
+package extras
 
 import (
 	"container/list"

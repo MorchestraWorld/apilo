@@ -1,6 +1,6 @@
 // Package src provides production-grade monitoring and observability system
 // This enhances the existing monitoring with comprehensive observability features
-package main
+package extras
 
 import (
 	"context"
@@ -896,6 +896,26 @@ type AlertMetrics struct {
 	ActiveAlerts     int64
 	ResolvedAlerts   int64
 	FalsePositives   int64
+}
+
+// HealthCheckResult represents the result of a health check
+type HealthCheckResult struct {
+	Healthy     bool
+	Message     string
+	Duration    time.Duration
+	LastChecked time.Time
+}
+
+// HealthCheckConfig configures health checking behavior
+type HealthCheckConfig struct {
+	Interval   time.Duration
+	DeepChecks bool
+}
+
+// MetricsCollector provides base metrics collection
+type MetricsCollector struct {
+	metrics map[string]float64
+	mutex   sync.RWMutex
 }
 
 // Constructor functions (simplified implementations)

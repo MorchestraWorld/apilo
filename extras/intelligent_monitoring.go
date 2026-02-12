@@ -1,6 +1,6 @@
 // Intelligent Cache Monitoring System
 // Implements predictive monitoring and automated optimization
-package main
+package extras
 
 import (
 	"context"
@@ -9,6 +9,12 @@ import (
 	"sync"
 	"time"
 )
+
+// MetricCollector defines a metric collection interface
+type MetricCollector interface {
+	Collect() map[string]float64
+	GetName() string
+}
 
 // IntelligentMonitor provides AI-powered cache monitoring
 type IntelligentMonitor struct {
@@ -27,7 +33,7 @@ type MonitoringState struct {
 	Started              bool
 	LastUpdate          time.Time
 	MonitoringLevel     MonitoringLevel
-	ActiveAlerts        []Alert
+	ActiveAlerts        []IntelligentAlert
 	PredictionAccuracy  float64
 	OptimizationsApplied int64
 	AnomaliesDetected   int64
@@ -61,7 +67,7 @@ type MetricBaseline struct {
 	SampleCount   int64
 	LastUpdated   time.Time
 	TrendSlope    float64
-	Seasonality   map[string]float64 // hour, day, week patterns
+	Seasonality   map[string]float64
 }
 
 // AnomalyAlgorithm defines anomaly detection methods
@@ -89,10 +95,10 @@ type Anomaly struct {
 
 type AnomalySeverity int
 const (
-	SeverityLow AnomalySeverity = iota
-	SeverityMedium
-	SeverityHigh
-	SeverityCritical
+	AnomalyLow AnomalySeverity = iota
+	AnomalyMedium
+	AnomalyHigh
+	AnomalyCritical
 )
 
 // PerformancePredictor forecasts cache performance
@@ -100,7 +106,7 @@ type PerformancePredictor struct {
 	models            map[string]*PredictionModel
 	historicalData    []PerformanceDataPoint
 	predictionHorizon time.Duration
-	accuracy          PredictionAccuracy
+	accuracy          IMPredictionAccuracy
 	lastTraining      time.Time
 }
 
@@ -110,8 +116,8 @@ type PredictionModel struct {
 	Parameters     map[string]float64
 	Accuracy       float64
 	LastTrained    time.Time
-	TrainingData   []DataPoint
-	ValidationData []DataPoint
+	TrainingData   []IntelligentDataPoint
+	ValidationData []IntelligentDataPoint
 }
 
 type ModelType int
@@ -134,30 +140,43 @@ type PerformanceDataPoint struct {
 	Context         map[string]interface{}
 }
 
-// PredictionAccuracy tracks prediction quality
-type PredictionAccuracy struct {
+// IMPredictionAccuracy tracks prediction quality
+type IMPredictionAccuracy struct {
 	Overall        float64
 	ByMetric       map[string]float64
-	ByTimeHorizon  map[string]float64 // 1h, 6h, 24h predictions
+	ByTimeHorizon  map[string]float64
 	LastUpdated    time.Time
 }
 
 // AutoOptimizer applies intelligent optimizations
 type AutoOptimizer struct {
-	optimizationStrategies []OptimizationStrategy
+	optimizationStrategies []MonitoringOptStrategy
 	appliedOptimizations   []AppliedOptimization
 	safetyLimits          SafetyLimits
 	learningEngine        *OptimizationLearningEngine
 	rollbackCapability    *RollbackManager
 }
 
-// OptimizationStrategy defines auto-optimization approaches
-type OptimizationStrategy interface {
-	ShouldApply(state CacheState, predictions []Prediction) bool
-	Apply(cache *FunctionalCache) OptimizationResult
-	Rollback(cache *FunctionalCache, result OptimizationResult) error
+// MonitoringOptStrategy defines auto-optimization approaches
+type MonitoringOptStrategy interface {
+	ShouldApply(state CacheState, predictions []MonitoringPrediction) bool
+	Apply(cache *FunctionalCache) MonitoringOptResult
+	Rollback(cache *FunctionalCache, result MonitoringOptResult) error
 	GetName() string
 	GetRiskLevel() RiskLevel
+}
+
+// MonitoringPrediction represents a monitoring-level prediction
+type MonitoringPrediction struct {
+	MetricName   string
+	Value        float64
+	Confidence   float64
+	TimeHorizon  time.Duration
+}
+
+// MonitoringOptResult represents the result of a monitoring optimization
+type MonitoringOptResult struct {
+	Success bool
 }
 
 type RiskLevel int
@@ -203,7 +222,7 @@ type IntelligentAlertManager struct {
 	alertRules        []IntelligentAlertRule
 	suppressionRules  []SuppressionRule
 	escalationPaths   map[string]EscalationPath
-	alertHistory      []Alert
+	alertHistory      []IntelligentAlert
 	notificationQueue chan AlertNotification
 }
 
@@ -213,7 +232,7 @@ type IntelligentAlertRule struct {
 	Name            string
 	Description     string
 	Condition       AlertCondition
-	Severity        AlertSeverity
+	Severity        IntelligentAlertSeverity
 	Cooldown        time.Duration
 	AutoResolve     bool
 	MLEnhanced      bool
@@ -227,11 +246,11 @@ type AlertCondition interface {
 	UpdateFromLearning(feedback AlertFeedback)
 }
 
-// Alert represents intelligent alert
-type Alert struct {
+// IntelligentAlert represents an intelligent alert
+type IntelligentAlert struct {
 	ID               string
 	RuleID           string
-	Severity         AlertSeverity
+	Severity         IntelligentAlertSeverity
 	Title            string
 	Description      string
 	TriggeredAt      time.Time
@@ -243,12 +262,12 @@ type Alert struct {
 	ResolutionNote   string
 }
 
-type AlertSeverity int
+type IntelligentAlertSeverity int
 const (
-	AlertInfo AlertSeverity = iota
-	AlertWarning
-	AlertError
-	AlertCritical
+	IntelligentAlertInfo IntelligentAlertSeverity = iota
+	IntelligentAlertWarning
+	IntelligentAlertError
+	IntelligentAlertCritical
 )
 
 // AlertContext provides intelligent context
@@ -292,13 +311,11 @@ func (im *IntelligentMonitor) StartIntelligentMonitoring(ctx context.Context, ca
 		return fmt.Errorf("intelligent monitoring already started")
 	}
 
-	// Initialize baseline metrics
 	err := im.establishBaseline(cache)
 	if err != nil {
 		return fmt.Errorf("failed to establish baseline: %w", err)
 	}
 
-	// Start monitoring goroutines
 	go im.runAnomalyDetection(ctx, cache)
 	go im.runPerformancePrediction(ctx, cache)
 	go im.runAutoOptimization(ctx, cache)
@@ -331,10 +348,9 @@ func (im *IntelligentMonitor) detectAnomalies(cache *FunctionalCache) {
 
 	for metricName, baseline := range im.anomalyDetector.baselineMetrics {
 		if metric, exists := currentMetrics[metricName]; exists {
-			// Calculate z-score anomaly detection
 			zScore := math.Abs(metric.Value - baseline.Mean) / baseline.StdDev
 
-			if zScore > 3.0 { // 3-sigma rule
+			if zScore > 3.0 {
 				anomaly := Anomaly{
 					ID:           fmt.Sprintf("anomaly_%d", time.Now().Unix()),
 					MetricName:   metricName,
@@ -350,7 +366,6 @@ func (im *IntelligentMonitor) detectAnomalies(cache *FunctionalCache) {
 				im.anomalyDetector.recentAnomalies = append(
 					im.anomalyDetector.recentAnomalies, anomaly)
 
-				// Trigger intelligent alert
 				im.triggerAnomalyAlert(anomaly)
 			}
 		}
@@ -379,16 +394,14 @@ func (im *IntelligentMonitor) generatePerformancePredictions(cache *FunctionalCa
 		HitRatio:    im.calculateHitRatio(cache),
 		Latency:     im.measureLatency(cache),
 		Throughput:  im.calculateThroughput(cache),
-		MemoryUsage: int64(cache.Size() * 1024), // Estimate
+		MemoryUsage: int64(cache.Size() * 1024),
 	}
 
 	im.performancePredictor.historicalData = append(
 		im.performancePredictor.historicalData, currentData)
 
-	// Generate predictions for next 1h, 6h, 24h
 	predictions := im.generatePredictions(currentData)
 
-	// Check if predictions indicate performance issues
 	for _, prediction := range predictions {
 		if im.isPredictionConcerning(prediction) {
 			im.triggerPredictiveAlert(prediction)
@@ -418,7 +431,6 @@ func (im *IntelligentMonitor) evaluateOptimizationOpportunities(cache *Functiona
 
 	for _, strategy := range im.autoOptimizer.optimizationStrategies {
 		if strategy.ShouldApply(currentState, predictions) {
-			// Check safety limits
 			if im.isSafeToApply(strategy, currentState) {
 				result := strategy.Apply(cache)
 
@@ -434,7 +446,6 @@ func (im *IntelligentMonitor) evaluateOptimizationOpportunities(cache *Functiona
 				im.autoOptimizer.appliedOptimizations = append(
 					im.autoOptimizer.appliedOptimizations, optimization)
 
-				// Learn from optimization results
 				im.autoOptimizer.learningEngine.LearnFromOptimization(optimization)
 			}
 		}
@@ -461,7 +472,7 @@ func (im *IntelligentMonitor) GetIntelligentInsights() IntelligentInsights {
 type IntelligentInsights struct {
 	MonitoringState       MonitoringState
 	RecentAnomalies      []Anomaly
-	PredictionAccuracy   PredictionAccuracy
+	PredictionAccuracy   IMPredictionAccuracy
 	OptimizationsApplied int
 	ActiveAlerts         int
 	IntelligenceScore    float64
@@ -496,9 +507,42 @@ const (
 	PriorityCritical
 )
 
-// Helper functions for implementation
+// Metric represents a performance metric
+type Metric struct {
+	Name      string
+	Value     float64
+	Timestamp time.Time
+	Tags      map[string]string
+}
+
+// Stub types for compilation
+type CacheState struct{}
+type TrendAnalysis struct{}
+type BusinessImpact struct{}
+type HistoricalPattern struct{}
+type AlertFeedback struct{}
+type RecommendedAction struct{}
+type IntelligentDataPoint struct{}
+type IntelligenceEngine struct{}
+type OptimizationLearningEngine struct{}
+type RollbackManager struct{}
+type EscalationPath struct{}
+type SuppressionRule struct{}
+type AlertNotification struct{}
+
+// Constructor functions
+func NewAnomalyDetector() *AnomalyDetector {
+	return &AnomalyDetector{baselineMetrics: make(map[string]MetricBaseline)}
+}
+func NewPerformancePredictor() *PerformancePredictor { return &PerformancePredictor{} }
+func NewAutoOptimizer() *AutoOptimizer               { return &AutoOptimizer{} }
+func NewIntelligentAlertManager() *IntelligentAlertManager {
+	return &IntelligentAlertManager{}
+}
+func NewIntelligenceEngine() *IntelligenceEngine { return &IntelligenceEngine{} }
+
+// Method stubs for IntelligentMonitor
 func (im *IntelligentMonitor) establishBaseline(cache *FunctionalCache) error {
-	// Implementation for establishing performance baseline
 	return nil
 }
 
@@ -508,47 +552,80 @@ func (im *IntelligentMonitor) collectCurrentMetrics(cache *FunctionalCache) map[
 
 func (im *IntelligentMonitor) calculateAnomalySeverity(zScore float64) AnomalySeverity {
 	if zScore > 5.0 {
-		return SeverityCritical
+		return AnomalyCritical
 	} else if zScore > 4.0 {
-		return SeverityHigh
+		return AnomalyHigh
 	} else if zScore > 3.0 {
-		return SeverityMedium
+		return AnomalyMedium
 	}
-	return SeverityLow
+	return AnomalyLow
 }
 
-// Additional helper functions would be implemented here...
-
-// Metric represents a performance metric
-type Metric struct {
-	Name      string
-	Value     float64
-	Timestamp time.Time
-	Tags      map[string]string
+func (im *IntelligentMonitor) runIntelligentAlerting(ctx context.Context) {
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			// Process alert queue
+		}
+	}
 }
 
-// Additional types and implementations...
-type CacheState struct{}
-type Prediction struct{}
-type OptimizationResult struct{ Success bool }
-type TrendAnalysis struct{}
-type BusinessImpact struct{}
-type HistoricalPattern struct{}
-type AlertFeedback struct{}
-type RecommendedAction struct{}
-type DataPoint struct{}
-type IntelligenceEngine struct{}
-type OptimizationLearningEngine struct{}
-type RollbackManager struct{}
-type EscalationPath struct{}
-type SuppressionRule struct{}
-type AlertNotification struct{}
+func (im *IntelligentMonitor) triggerAnomalyAlert(anomaly Anomaly) {
+	im.monitoringState.AnomaliesDetected++
+}
 
-// Constructor functions
-func NewAnomalyDetector() *AnomalyDetector { return &AnomalyDetector{} }
-func NewPerformancePredictor() *PerformancePredictor { return &PerformancePredictor{} }
-func NewAutoOptimizer() *AutoOptimizer { return &AutoOptimizer{} }
-func NewIntelligentAlertManager() *IntelligentAlertManager { return &IntelligentAlertManager{} }
-func NewIntelligenceEngine() *IntelligenceEngine { return &IntelligenceEngine{} }
+func (im *IntelligentMonitor) calculateHitRatio(cache *FunctionalCache) float64 {
+	return 0.0
+}
 
-// Additional method implementations would continue here...
+func (im *IntelligentMonitor) measureLatency(cache *FunctionalCache) time.Duration {
+	return 0
+}
+
+func (im *IntelligentMonitor) calculateThroughput(cache *FunctionalCache) float64 {
+	return 0.0
+}
+
+func (im *IntelligentMonitor) generatePredictions(data PerformanceDataPoint) []MonitoringPrediction {
+	return nil
+}
+
+func (im *IntelligentMonitor) isPredictionConcerning(p MonitoringPrediction) bool {
+	return p.Confidence > 0.8 && p.Value < 0.5
+}
+
+func (im *IntelligentMonitor) triggerPredictiveAlert(p MonitoringPrediction) {
+	// Would create alert from prediction
+}
+
+func (im *IntelligentMonitor) assessCacheState(cache *FunctionalCache) CacheState {
+	return CacheState{}
+}
+
+func (im *IntelligentMonitor) getRecentPredictions() []MonitoringPrediction {
+	return nil
+}
+
+func (im *IntelligentMonitor) isSafeToApply(strategy MonitoringOptStrategy, state CacheState) bool {
+	return strategy.GetRiskLevel() <= RiskMedium
+}
+
+func (im *IntelligentMonitor) measureOptimizationImpact(result MonitoringOptResult) PerformanceImpact {
+	return PerformanceImpact{}
+}
+
+func (im *IntelligentMonitor) calculateIntelligenceScore() float64 {
+	return 0.0
+}
+
+func (im *IntelligentMonitor) generateIntelligentRecommendations() []IntelligentRecommendation {
+	return nil
+}
+
+func (ole *OptimizationLearningEngine) LearnFromOptimization(opt AppliedOptimization) {
+	// Would update learning model from optimization outcome
+}

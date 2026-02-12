@@ -1,6 +1,6 @@
 // Autonomous Cache Learning System
 // Implements machine learning-based cache optimization
-package main
+package extras
 
 import (
 	"fmt"
